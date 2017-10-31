@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>websocket实例</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<h3>websocket实例  -聊天业务</h3>
+
+
+<div style="position: relative; left: 20px;">
+    <div>
+        <h3>在线人员</h3>
+        <ul id="onlineList">
+        </ul>
+    </div>
+
+    <div>
+        <h3>聊天内容</h3>
+        <ul id="contentList">
+        </ul>
+    </div>
+
+    <div>
+        <label>对方id</label>
+        <input type="text" name="targetId" id="targetId" >
+    </div>
+    <div>
+        <label>聊天内容</label>
+        <input  type="text" name="content" id="content"  >
+    </div>
+    <button id="sendBtn">发送</button>
+
+</div>
+
+</body>
+<script type="text/javascript" src="../js/jquery-1.12.0.js"></script>
+<script type="text/javascript" src="../js/location-message-ws.js"></script>
+<script type="text/javascript" >
+
+
+    $(document).ready(function () {
+        //走反向代理
+        var url = 'ws://127.0.0.1:38888/chat.do';
+        var webSocketClient = new WebSocketClient(url , 'index.do');
+        webSocketClient.registMessageListener(function(message) {
+            // debugger
+            var data = message.data;
+            var type = message.type;
+            // 后台发送的消息
+            if (data && type == 'message' && data.length > 0 ) {
+                // console.log('data : ' + data)
+
+                console.log('data : ' + data);
+                var sendContent = JSON.parse(data);
+                if (sendContent.type == 0) {
+                    var id = sendContent.id;
+                    $('#' + id).css('color' , 'red');
+                } else if (sendContent.type && sendContent.type == 1){
+                    var html = '';
+                    var content = sendContent.content ;
+                    var sendId = sendContent.sendId ;
+                    var span1 = '<div>发送人: ' + sendId + '</div>'
+                    var span2 = '<div>收到内容: ' + content + '</div>'
+                    html = '<li>' + span1 + span2 +'</li>'
+                    $('#contentList').append(html)
+                }
+            } else {
+                // console.log(' ping pong hit .....')
+            }
+            // console.log('------消息到达 message : ' , message );
+        });
+        webSocketClient.registCloseEventListener(function(event) {
+            // console.log('------close message : ' , event);
+        });
+        webSocketClient.onError(function(data) {
+            // console.log('------onError message : ' , event);
+        });
+
+        webSocketClient.init(null , function (success, message) {
+            // console.log('success : ' + success + '  message : ' + message);
+            if (success) {
+            } else {
+
+            }
+        });
+
+        $('#sendBtn').on('click' , function(){
+            var targetId = $('#targetId').val();
+            var content = $('#content').val();
+            var chatContent = {};
+            chatContent.content = content;
+            chatContent.targetId = targetId;
+            webSocketClient.send(JSON.stringify(chatContent));
+
+        })
+
+        getOnlienList();
+        function getOnlienList() {
+            //走反向代理
+            var url = 'ws://127.0.0.1:38888/chatOnlineList.do';
+            var webSocketClient = new WebSocketClient(url , 'chatOnlineList.do');
+            webSocketClient.registMessageListener(function(message) {
+                // debugger
+                var data = message.data;
+                var type = message.type;
+                // 后台发送的消息
+                if (data && type == 'message' && data.length > 0 ) {
+                    // console.log('data : ' + data)
+
+                    console.log('data : ' + data)
+                    var onlineList = JSON.parse(data);
+                    $('#onlineList').html('');
+
+                    for (key in onlineList) {
+                        var html = ' '
+                        html = '<li id="'+ key +'">' + key + '</li>'
+                        $('#onlineList').append(html);
+                    }
+
+                } else {
+                    // console.log(' ping pong hit .....')
+                }
+                // console.log('------消息到达 message : ' , message );
+            });
+            webSocketClient.registCloseEventListener(function(event) {
+                // console.log('------close message : ' , event);
+            });
+            webSocketClient.onError(function(data) {
+                // console.log('------onError message : ' , event);
+            });
+
+            webSocketClient.init(null , function (success, message) {
+                // console.log('success : ' + success + '  message : ' + message);
+                if (success) {
+                } else {
+
+                }
+            });
+
+        }
+        
+        
+    });
+
+
+
+</script>
+</html>

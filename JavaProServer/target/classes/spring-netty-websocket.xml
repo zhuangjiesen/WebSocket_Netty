@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" 
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd    
+            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd    
+            http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd  
+http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.2.xsd            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd"
+>
+
+	<!-- websocket 配置-->
+
+	<!-- 请求处理器 -->
+	<bean id="frameHandlerAdapter" class="com.java.core.netty.websocket.common.FrameHandlerAdapter"  >
+	</bean>
+	<bean id="locationHandlerAdapter" class="com.java.core.netty.websocket.common.LocationHandlerAdapter"  >
+	</bean>
+	<bean id="chatHandlerAdapter" class="com.java.core.netty.websocket.chat.ChatHandlerAdapter"  >
+	</bean>
+	<bean id="chatOnlineListHandlerAdapter" class="com.java.core.netty.websocket.chat.ChatOnlineListHandlerAdapter"  >
+	</bean>
+
+
+
+
+	<!-- 升级请求处理器 -->
+	<bean id="upgradeResolver" class="com.java.core.netty.websocket.resolver.UpgradeResolver"  >
+	</bean>
+	<!-- 存储管理器 -->
+	<bean id="webSocketClientDao" class="com.java.core.netty.websocket.cache.WebSocketClientDao"  >
+	</bean>
+	<bean id="webSocketCacheManager" class="com.java.core.netty.websocket.cache.WebSocketCacheManager"  >
+		<property name="webSocketClientDao" ref="webSocketClientDao" />
+	</bean>
+
+	<!-- 请求映射处理器 -->
+	<bean id="requestHandlerMapping" class="com.java.core.netty.websocket.mapping.RequestHandlerMapping"  >
+	</bean>
+
+
+	<!-- 请求处理工厂类 -->
+	<bean id="webSocketChannelHandlerFactory" class="com.java.core.netty.websocket.handler.WebSocketChannelHandlerFactory"  >
+		<property name="webSocketCacheManager" ref="webSocketCacheManager"/>
+		<property name="upgradeResolver" ref="upgradeResolver"/>
+		<property name="requestHandlerMapping" ref="requestHandlerMapping"/>
+	</bean>
+
+
+	<bean id="webSocketNettyServer" class="com.java.core.netty.websocket.server.WebSocketNettyServer" init-method="startNettyServer" >
+		<property name="port" value="38888" />
+		<property name="webSocketChannelHandlerFactory"  ref="webSocketChannelHandlerFactory" />
+	</bean>
+
+
+
+	<!-- 测试类 -->
+	<bean id="webSocketTestService" class="com.java.service.WebSocketTestService"  >
+	</bean>
+
+
+
+</beans>
+	
