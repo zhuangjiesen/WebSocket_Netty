@@ -165,5 +165,11 @@ locationHandlerAdapter.handleResponse(locParams);
 此方案难度太大，曾经使用nginx+lua 模块实现，最后还是不行，网上有通过java实现的反向代理技术，可以试试
 
 
+### 静态测试页面
+```
+websocket-chat-test.html
+websocket-push-pl.html
 
+效果展示在 演示效果 文件夹中
+```
 
