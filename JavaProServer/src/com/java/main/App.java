@@ -1,10 +1,7 @@
 package com.java.main;
 
-import com.java.service.JedisTestService;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
-
-import com.java.service.TestService;
 
 import java.io.File;
 import java.util.concurrent.CountDownLatch;

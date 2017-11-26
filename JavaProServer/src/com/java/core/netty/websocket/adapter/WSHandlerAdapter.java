@@ -9,7 +9,7 @@ import java.util.Map;
 /**
  * Created by zhuangjiesen on 2017/9/13.
  */
-public interface HandlerAdapter {
+public interface WSHandlerAdapter {
 
     /*
     *

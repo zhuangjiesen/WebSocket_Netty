@@ -1,7 +1,7 @@
 package com.java.core.netty.websocket.adapter;
 
 import com.alibaba.fastjson.JSON;
-import com.java.core.netty.websocket.annotation.RequestMapping;
+import com.java.core.netty.websocket.annotation.WSRequestMapping;
 import com.java.core.netty.websocket.cache.WebSocketClient;
 import com.java.core.netty.websocket.resolver.AbstractControlFrameResolver;
 import com.java.core.netty.websocket.resolver.DataFrameResolver;
@@ -10,8 +10,6 @@ import io.netty.handler.codec.http.websocketx.*;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-
-import java.util.Map;
 
 /**
  *
@@ -24,7 +22,7 @@ import java.util.Map;
  * Created by zhuangjiesen on 2017/9/13.
  */
 
-public abstract class AbstractFrameHandlerAdapter<T extends WebSocketFrame> extends AbstractControlFrameResolver implements HandlerAdapter , DataFrameResolver<T> , ApplicationContextAware {
+public abstract class AbstractFrameHandlerAdapter<T extends WebSocketFrame> extends AbstractControlFrameResolver implements WSHandlerAdapter, DataFrameResolver<T> , ApplicationContextAware {
 
     public ApplicationContext applicationContext;
 
@@ -84,7 +82,7 @@ public abstract class AbstractFrameHandlerAdapter<T extends WebSocketFrame> exte
 
     public String getUri(){
         String uri = null;
-        RequestMapping requestMapping = this.getClass().getAnnotation(RequestMapping.class);
+        WSRequestMapping requestMapping = this.getClass().getAnnotation(WSRequestMapping.class);
         if (requestMapping != null) {
             uri = requestMapping.uri();
         }

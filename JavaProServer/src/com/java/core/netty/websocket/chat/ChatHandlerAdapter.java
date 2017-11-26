@@ -1,14 +1,11 @@
 package com.java.core.netty.websocket.chat;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.java.core.netty.websocket.adapter.KeepAliveHandlerAdapter;
-import com.java.core.netty.websocket.annotation.RequestMapping;
+import com.java.core.netty.websocket.annotation.WSRequestMapping;
 import com.java.core.netty.websocket.cache.WebSocketCacheManager;
 import com.java.core.netty.websocket.cache.WebSocketClient;
 import com.java.core.netty.websocket.constant.WebSocketConstant;
-import com.java.core.netty.websocket.resolver.AbstractControlFrameResolver;
-import com.java.core.netty.websocket.resolver.DataFrameResolver;
 import com.java.core.netty.websocket.utils.MessageUtils;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -22,7 +19,7 @@ import java.util.Map;
  * Created by zhuangjiesen on 2017/9/13.
  */
 
-@RequestMapping(uri = "/chat.do")
+@WSRequestMapping(uri = "/chat" )
 public class ChatHandlerAdapter   extends KeepAliveHandlerAdapter<TextWebSocketFrame> {
 
 

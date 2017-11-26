@@ -2,7 +2,6 @@ package com.java.core.netty.websocket.cache;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Set;
 
 /**
@@ -92,9 +91,6 @@ public class WebSocketCacheManager {
     public void setWebSocketClientDao(WebSocketClientDao webSocketClientDao) {
         this.webSocketClientDao = webSocketClientDao;
     }
-
-
-
 
 
 

@@ -1,12 +1,8 @@
 package com.java.core.netty.websocket.handler;
 
 import com.java.core.netty.websocket.cache.WebSocketCacheManager;
-import com.java.core.netty.websocket.mapping.RequestHandlerMapping;
+import com.java.core.netty.websocket.mapping.WSRequestHandlerMapping;
 import com.java.core.netty.websocket.resolver.UpgradeResolver;
-import io.netty.channel.ChannelInboundHandlerAdapter;
-import org.springframework.beans.factory.InitializingBean;
-
-import java.lang.reflect.Constructor;
 
 /**
  *
@@ -17,7 +13,7 @@ import java.lang.reflect.Constructor;
 public class WebSocketChannelHandlerFactory  {
 
     private UpgradeResolver upgradeResolver;
-    private RequestHandlerMapping requestHandlerMapping;
+    private WSRequestHandlerMapping requestHandlerMapping;
     private WebSocketCacheManager webSocketCacheManager;
 
     public WebSocketChannelHandler newWebSocketChannelHandler() {
@@ -47,11 +43,11 @@ public class WebSocketChannelHandlerFactory  {
         this.upgradeResolver = upgradeResolver;
     }
 
-    public RequestHandlerMapping getRequestHandlerMapping() {
+    public WSRequestHandlerMapping getRequestHandlerMapping() {
         return requestHandlerMapping;
     }
 
-    public void setRequestHandlerMapping(RequestHandlerMapping requestHandlerMapping) {
+    public void setRequestHandlerMapping(WSRequestHandlerMapping requestHandlerMapping) {
         this.requestHandlerMapping = requestHandlerMapping;
     }
 

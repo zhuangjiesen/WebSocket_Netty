@@ -8,7 +8,7 @@
 <body>
 
 <h1>websocket实例 推送模块展示平台</h1>
-<h5>展示多订阅业务的实现</h5>
+<h5>展示单请求单订阅业务的实现</h5>
 <div style="position: relative; left : 50px;" >
     可选订阅主题:
     <ul>
@@ -56,8 +56,8 @@
     function subUri(uri){
 
         //走反向代理
-        var url = 'ws://127.0.0.1:38888/' + uri + '.do';
-        var webSocketClient = new WebSocketClient(url ,  uri + '.do' );
+        var url = 'ws://127.0.0.1:38888/' + uri ;
+        var webSocketClient = new WebSocketClient(url );
         webSocketClient.registMessageListener(function(message) {
             // debugger
             var data = message.data;

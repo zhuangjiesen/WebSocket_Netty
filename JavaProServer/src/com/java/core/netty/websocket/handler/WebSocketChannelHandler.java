@@ -1,14 +1,19 @@
 package com.java.core.netty.websocket.handler;
 
-import com.java.core.netty.websocket.adapter.HandlerAdapter;
+import com.java.core.netty.websocket.adapter.WSHandlerAdapter;
 import com.java.core.netty.websocket.cache.WebSocketCacheManager;
 import com.java.core.netty.websocket.cache.WebSocketClient;
-import com.java.core.netty.websocket.mapping.RequestHandlerMapping;
+import com.java.core.netty.websocket.mapping.WSRequestHandlerMapping;
 import com.java.core.netty.websocket.resolver.UpgradeResolver;
+import com.java.core.netty.websocket.utils.MessageUtils;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
+import io.netty.handler.codec.http.websocketx.WebSocketServerHandshaker;
+import org.springframework.util.ObjectUtils;
+
+import java.util.Set;
 
 /**
  * Created by zhuangjiesen on 2017/9/13.
@@ -18,7 +23,7 @@ public class WebSocketChannelHandler  extends ChannelInboundHandlerAdapter {
 
     private UpgradeResolver upgradeResolver;
 
-    private RequestHandlerMapping requestHandlerMapping;
+    private WSRequestHandlerMapping requestHandlerMapping;
 
     private WebSocketCacheManager webSocketCacheManager;
 
@@ -29,31 +34,44 @@ public class WebSocketChannelHandler  extends ChannelInboundHandlerAdapter {
         if (msg instanceof FullHttpRequest) {
             //处理http请求
             FullHttpRequest request = (FullHttpRequest) msg;
+            String uri = request.uri();
+            if (uri.startsWith("//")) {
+                request.setUri(uri.substring(1));
+            }
 
-            WebSocketClient webSocketClient = null;
+
+
+            WebSocketClient webSocketClient = new WebSocketClient();
             String id = getChannelCtxId(ctx);
             //先注册请求处理器
-            HandlerAdapter handlerAdapter = null;
             try {
-                handlerAdapter = requestHandlerMapping.registHandlerAdapter(request.uri() , id);
+                requestHandlerMapping.registHandlerAdapter(request , id , webSocketClient);
             } catch (Exception e) {
                 e.printStackTrace();
                 //处理异常 没有具体映射的请求处理器
                 upgradeResolver.handleRequestError(ctx, request , e);
                 return ;
             }
-            if ((webSocketClient = upgradeResolver.handleRequest(ctx, request , handlerAdapter)) != null) {
+            WebSocketServerHandshaker handshaker = null;
+            // upgrade 与 websocket 握手过程
+            if ((handshaker = upgradeResolver.handleRequest(ctx, request )) != null) {
+                //设置uri
+                webSocketClient.setUri(MessageUtils.getHttpGetUri(request.uri()));
+                //设置请求参数
+                webSocketClient.setReqParam(MessageUtils.getHttpGetParams(request.uri()));
+                webSocketClient.setChannelHandlerContext(ctx);
+                webSocketClient.setHandshaker(handshaker);
                 //注册连接管理器
                 webSocketCacheManager.putWebSocketClient(id , webSocketClient);
                 //完成后调用
-                handlerAdapter.onUpgradeCompleted(ctx , webSocketClient);
+                webSocketClient.getHandlerAdapter().onUpgradeCompleted(ctx , webSocketClient);
             }
         } else if (msg instanceof WebSocketFrame) {
             //处理websocket请求
-            HandlerAdapter handlerAdapter = null;
             String id = getChannelCtxId(ctx);
             //获取请求处理器
-            if ((handlerAdapter = (HandlerAdapter) requestHandlerMapping.getFrameHandlerAdapterById(id)) != null) {
+            WSHandlerAdapter handlerAdapter = null;
+            if ((handlerAdapter = requestHandlerMapping.getFrameHandlerAdapterById(id)) != null) {
                 WebSocketFrame webSocketFrame = (WebSocketFrame) msg;
                 WebSocketClient webSocketClient = webSocketCacheManager.getWebSocketClient(id);
                 //处理请求
@@ -87,11 +105,11 @@ public class WebSocketChannelHandler  extends ChannelInboundHandlerAdapter {
         this.upgradeResolver = upgradeResolver;
     }
 
-    public RequestHandlerMapping getRequestHandlerMapping() {
+    public WSRequestHandlerMapping getRequestHandlerMapping() {
         return requestHandlerMapping;
     }
 
-    public void setRequestHandlerMapping(RequestHandlerMapping requestHandlerMapping) {
+    public void setRequestHandlerMapping(WSRequestHandlerMapping requestHandlerMapping) {
         this.requestHandlerMapping = requestHandlerMapping;
     }
 

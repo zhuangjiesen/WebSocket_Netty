@@ -1,8 +1,12 @@
 package com.java.core.netty.websocket.cache;
 
-import com.java.core.netty.websocket.adapter.HandlerAdapter;
+import com.java.core.netty.websocket.adapter.WSHandlerAdapter;
+import com.java.core.netty.websocket.protocol.WSProtocolHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshaker;
+
+import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -13,15 +17,20 @@ public class WebSocketClient {
 
     private WebSocketServerHandshaker handshaker ;
     private ChannelHandlerContext channelHandlerContext ;
-    private HandlerAdapter handlerAdapter;
+    /** 请求处理器 **/
+    private WSHandlerAdapter handlerAdapter;
+    /*是否有protocol */
+    private boolean hasSubProtocols;
     private String uri;
+    private String[] protocols;
+    private Map<String ,Object> reqParam;
 
+    public Map<String, Object> getReqParam() {
+        return reqParam;
+    }
 
-    public WebSocketClient(WebSocketServerHandshaker handshaker, ChannelHandlerContext channelHandlerContext, HandlerAdapter handlerAdapter, String uri) {
-        this.handshaker = handshaker;
-        this.channelHandlerContext = channelHandlerContext;
-        this.handlerAdapter = handlerAdapter;
-        this.uri = uri;
+    public void setReqParam(Map<String, Object> reqParam) {
+        this.reqParam = reqParam;
     }
 
     public WebSocketServerHandshaker getHandshaker() {
@@ -49,11 +58,27 @@ public class WebSocketClient {
     }
 
 
-    public HandlerAdapter getHandlerAdapter() {
+    public WSHandlerAdapter getHandlerAdapter() {
         return handlerAdapter;
     }
 
-    public void setHandlerAdapter(HandlerAdapter handlerAdapter) {
+    public void setHandlerAdapter(WSHandlerAdapter handlerAdapter) {
         this.handlerAdapter = handlerAdapter;
+    }
+
+    public boolean isHasSubProtocols() {
+        return hasSubProtocols;
+    }
+
+    public void setHasSubProtocols(boolean hasSubProtocols) {
+        this.hasSubProtocols = hasSubProtocols;
+    }
+
+    public String[] getProtocols() {
+        return protocols;
+    }
+
+    public void setProtocols(String[] protocols) {
+        this.protocols = protocols;
     }
 }

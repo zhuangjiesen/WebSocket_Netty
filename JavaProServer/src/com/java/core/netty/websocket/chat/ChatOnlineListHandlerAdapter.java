@@ -2,17 +2,14 @@ package com.java.core.netty.websocket.chat;
 
 import com.alibaba.fastjson.JSONObject;
 import com.java.core.netty.websocket.adapter.KeepAliveHandlerAdapter;
-import com.java.core.netty.websocket.annotation.RequestMapping;
+import com.java.core.netty.websocket.annotation.WSRequestMapping;
 import com.java.core.netty.websocket.cache.WebSocketCacheManager;
 import com.java.core.netty.websocket.cache.WebSocketClient;
 import com.java.core.netty.websocket.utils.MessageUtils;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
-import org.apache.commons.beanutils.BeanUtils;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,7 +18,7 @@ import java.util.Map;
  * Created by zhuangjiesen on 2017/9/13.
  */
 
-@RequestMapping(uri = "/chatOnlineList.do")
+@WSRequestMapping(uri = "/chatOnlineList")
 public class ChatOnlineListHandlerAdapter extends KeepAliveHandlerAdapter<TextWebSocketFrame> {
 
 

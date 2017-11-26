@@ -1,6 +1,6 @@
 package com.java.core.netty.websocket.resolver;
 
-import com.java.core.netty.websocket.adapter.HandlerAdapter;
+import com.java.core.netty.websocket.adapter.WSHandlerAdapter;
 import com.java.core.netty.websocket.cache.WebSocketClient;
 import com.java.core.netty.websocket.constant.WebSocketConstant;
 import com.sun.javafx.binding.StringFormatter;
@@ -14,6 +14,8 @@ import io.netty.handler.codec.http.websocketx.WebSocketServerHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory;
 import io.netty.util.CharsetUtil;
 
+import java.util.Set;
+
 /**
  *
  *
@@ -25,9 +27,9 @@ public class UpgradeResolver {
 
     private int frameLength;
 
-    private static WebSocketServerHandshakerFactory wsFactory;
 
-    public WebSocketClient handleRequest(ChannelHandlerContext ctx , FullHttpRequest request , HandlerAdapter handlerAdapter){
+
+    public WebSocketServerHandshaker handleRequest(ChannelHandlerContext ctx , FullHttpRequest request ){
         boolean result = false;
         //处理升级请求
         result = handleUpgradeRequest(ctx, request);
@@ -35,10 +37,10 @@ public class UpgradeResolver {
             //拦截过滤 -> 可能对cookie 或者 作权限验证
             result = doFilter(ctx, request);
             if (result) {
-                WebSocketClient webSocketClient = null;
+                WebSocketServerHandshaker handshaker = null;
                 //握手成功
-                if ((webSocketClient = doHandshake(ctx, request , handlerAdapter)) != null) {
-                    return webSocketClient;
+                if ((handshaker = doHandshake(ctx, request )) != null) {
+                    return handshaker;
                 }
             }
         }
@@ -126,10 +128,10 @@ public class UpgradeResolver {
     *
     *
     * */
-    public WebSocketClient doHandshake(ChannelHandlerContext ctx , FullHttpRequest request , HandlerAdapter handlerAdapter){
-        WebSocketClient webSocketClient = null;
+    public WebSocketServerHandshaker doHandshake(ChannelHandlerContext ctx , FullHttpRequest request ){
         HttpHeaders httpHeaders = request.headers();
-
+        String protocols = httpHeaders.get( WebSocketConstant.SEC_WEBSOCKET_PROTOCOL);
+//        "Sec-WebSocket-Protocol" -> "location.do, default.do"
         String host = httpHeaders.get("Host").toString();
         String uri = request.uri();
         String webAddress = StringFormatter.format(WebSocketConstant.DEFAULT_WEBSOCKET_ADDRESS_FORMAT , host).getValueSafe() + uri;
@@ -138,10 +140,12 @@ public class UpgradeResolver {
         if (frameLength == 0) {
             frameLength = 10 * 1024 * 1024;
         }
-        if (wsFactory == null) {
-            wsFactory = new WebSocketServerHandshakerFactory(
-                    webAddress , uri, true , frameLength );
-        }
+        WebSocketServerHandshakerFactory wsFactory = wsFactory = new WebSocketServerHandshakerFactory(
+                webAddress , protocols , true , frameLength );
+//        if (wsFactory == null) {
+//            wsFactory = new WebSocketServerHandshakerFactory(
+//                    webAddress , uri, true , frameLength );
+//        }
         WebSocketServerHandshaker handshaker = wsFactory.newHandshaker(request);
         if (handshaker == null) {
             //版本不兼容
@@ -149,12 +153,8 @@ public class UpgradeResolver {
                     .sendUnsupportedVersionResponse(ctx.channel());
         } else {
             handshaker.handshake(ctx.channel(), request);
-
-            //握手成功
-            webSocketClient = new WebSocketClient(handshaker , ctx , handlerAdapter , uri);
         }
-
-        return webSocketClient;
+        return handshaker;
     }
 
 

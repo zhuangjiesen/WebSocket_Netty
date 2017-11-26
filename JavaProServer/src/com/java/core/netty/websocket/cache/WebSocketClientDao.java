@@ -4,7 +4,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.PingWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.WebSocketServerHandshaker;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -13,7 +12,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -33,12 +31,11 @@ public class WebSocketClientDao {
     private static ScheduledExecutorService scheduleService = Executors.newScheduledThreadPool(1);
 
     static {
-        scheduleService.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                System.out.println(" 打断点测试用 用来看连接数....");
-            }
-        } , 1L , 10 , TimeUnit.SECONDS);
+//        scheduleService.scheduleAtFixedRate(new Runnable() {
+//            @Override
+//            public void run() {
+//            }
+//        } , 1L , 10 , TimeUnit.SECONDS);
     }
 
 
@@ -97,7 +94,6 @@ public class WebSocketClientDao {
             pingPongChannelsMap.remove(channelId);
         } catch (Exception e) {
             e.printStackTrace();
-            System.err.println("err : " + e.getMessage());
         }
     }
 

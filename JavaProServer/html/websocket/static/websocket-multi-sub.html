@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>websocket实例</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<h1>websocket实例 推送模块展示平台</h1>
+<h3>展示单请求 多订阅业务的实现</h3>
+<h5>业务场景： 有时候一个页面需要多个推送业务(人员信息变更，统计信息变更，业务状态变更等)，但是多个请求维护明显不符合要求</h5>
+<h5>实现： 勾选想要的主题。后端只推送选中的主题相应的推送消息</h5>
+<div style="position: relative; left : 50px;" >
+    可选订阅主题:
+    <ul>
+        <li>
+            <div class="targetName">默认订阅</div>
+            <h3>URI : </h3>
+            <div class="targetUri">/</div>
+            <div>
+                <h3>参数 : </h3>
+                <input type="text" name="params" id="params" >
+            </div>
+            <h3>订阅主题 protocols : </h3>
+            <div>
+                <div>
+                    <label for="indexProtocol"  >index</label>
+                    <input type="checkbox" id="indexProtocol" name="protocols" value="index" >
+                </div>
+                <div>
+                    <label for="locationProtocol" >location</label>
+                    <input id="locationProtocol" type="checkbox" name="protocols" value="location" >
+                </div>
+                <div>
+                    <label for="newsProtocol" >news</label>
+                    <input id="newsProtocol" type="checkbox" name="protocols" value="news" >
+                </div>
+                <div>
+                    <label for="stockInfoProtocol"  >stockInfo</label>
+                    <input id="stockInfoProtocol" type="checkbox" name="protocols" value="stockInfo" >
+                </div>
+            </div>
+            <br>
+            <button onclick="onSubUri(this);">订阅</button>
+        </li>
+    </ul>
+</div>
+
+<div style="position: relative; left : 100px;"  >
+    <div>订阅目录</div>
+    <div id="subscribeList">
+
+
+    </div>
+
+</div>
+
+
+
+
+</body>
+<script type="text/javascript" src="../js/jquery-1.12.0.js"></script>
+<script type="text/javascript" src="../js/location-message-ws.js"></script>
+<script type="text/javascript" >
+
+
+    $(document).ready(function () {
+    });
+
+    function onSubUri(item){
+        var protocols = [] ;
+        $("input[name='protocols']:checkbox:checked").each(function(){
+            protocols.push($(this).val()) ;
+        })
+        var targetName = $(item).parent().find('.targetName').text();
+        var targetUri = $(item).parent().find('.targetUri').text();
+        var params = $('#params').val();
+        subUri(targetUri , protocols , params);
+        $('#subscribeList').append('<ul id="defaultUri"> ' + '<font style="color: red">' + targetName + '</font>' + ' </ul>')
+    }
+
+    function subUri(uri , protocols , params){
+        //走反向代理
+        var url = 'ws://127.0.0.1:38888/';
+        if (params && params.length > 0) {
+            url = url + '?' + params;
+        }
+        var webSocketClient = new WebSocketClient(url ,  protocols );
+        webSocketClient.registMessageListener(function(message) {
+            // debugger
+            var data = message.data;
+            var type = message.type;
+            // 后台发送的消息
+            if (data && type == 'message' && data.length > 0 ) {
+                // console.log('data : ' + data)
+
+                console.log('data : ' + data)
+                $('#defaultUri').append('<li>' + data + '</li>')
+            } else {
+                // console.log(' ping pong hit .....')
+            }
+            // console.log('------消息到达 message : ' , message );
+        });
+        webSocketClient.registCloseEventListener(function(event) {
+            // console.log('------close message : ' , event);
+        });
+        webSocketClient.onError(function(data) {
+            // console.log('------onError message : ' , event);
+        });
+
+        webSocketClient.init(null , function (success, message) {
+            // console.log('success : ' + success + '  message : ' + message);
+            if (success) {
+            } else {
+
+            }
+        });
+    }
+
+</script>
+</html>

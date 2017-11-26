@@ -25,6 +25,16 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	</bean>
 
 
+	<bean id="indexProtocolHandler" class="com.java.core.netty.websocket.common.protocols.IndexProtocolHandler"  >
+	</bean>
+	<bean id="locationProtocolHandler" class="com.java.core.netty.websocket.common.protocols.LocationProtocolHandler"  >
+	</bean>
+	<bean id="newsProtocolHandler" class="com.java.core.netty.websocket.common.protocols.NewsProtocolHandler"  >
+	</bean>
+	<bean id="stockInfoProtocolHandler" class="com.java.core.netty.websocket.common.protocols.StockInfoProtocolHandler"  >
+	</bean>
+
+
 
 
 	<!-- 升级请求处理器 -->
@@ -38,7 +48,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	</bean>
 
 	<!-- 请求映射处理器 -->
-	<bean id="requestHandlerMapping" class="com.java.core.netty.websocket.mapping.RequestHandlerMapping"  >
+	<bean id="requestHandlerMapping" class="com.java.core.netty.websocket.mapping.WSRequestHandlerMapping"  >
 	</bean>
 
 

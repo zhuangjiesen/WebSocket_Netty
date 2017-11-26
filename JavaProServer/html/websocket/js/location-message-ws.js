@@ -1,4 +1,4 @@
-var WebSocketClient = function (url ){
+var WebSocketClient = function (url , subprotocols ){
     //请求url
     this.url = url;
     this.name = null;
@@ -40,8 +40,7 @@ var WebSocketClient = function (url ){
                 if (!this.url) {
                     return false;
                 }
-
-                webSocket = new WebSocket(this.url);
+                webSocket = new WebSocket(this.url , subprotocols);
                 webSocket.onerror = function (event) {
                     console.log(' an error coming... ' , event);
                     if (webSocket.readyState == 3) {
@@ -63,6 +62,9 @@ var WebSocketClient = function (url ){
 
             // 打开Socket
             webSocket.onopen = function(event) {
+                console.log('webSocket.extensions : ' + webSocket.extensions);
+                console.log('webSocket.protocol  : ' + webSocket.protocol);
+
                 //WebSocket.OPEN 数值 1
                 if (webSocket.readyState == WebSocket.OPEN) {
                     appWebSocketObj.isOpen = true;
