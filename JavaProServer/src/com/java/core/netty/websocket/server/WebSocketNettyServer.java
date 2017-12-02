@@ -50,6 +50,9 @@ public class WebSocketNettyServer {
                 try {
                     ServerBootstrap bootstrap = new ServerBootstrap();
                     bootstrap.group(boss, worker);
+
+
+
                     bootstrap.channel(NioServerSocketChannel.class);
                     bootstrap.option(ChannelOption.SO_BACKLOG, 1024); //连接数
                     bootstrap.option(ChannelOption.TCP_NODELAY, true);  //不延迟，消息立即发送

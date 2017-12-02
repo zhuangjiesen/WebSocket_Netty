@@ -1,13 +1,14 @@
-# WebSocket_Netty
-netty实现的websocket推送框架
+# Netty实现的websocket推送框架
 
-
+### 2017-11-20 更新 单请求多协议(多订阅) 实现
 
 # WebSocket Netty实现
 
 ### 目的
 业务需求，需要向前端浏览器订阅推送业务，接受后端推送，之前用的是amq.js （activemq基于轮询实现），有很大的性能问题和实时性也无法保证；
 所以就使用了 netty 实现了个 Websocket 框架
+
+推送需求：有时候需要进行多订阅，对于前端的需求的多消息类型分别接收，后端需要不同订阅的业务进行隔离，各自发送推送，所以又优化了单请求多订阅的功能。
 
 #### WebSocket 基于H5实现，低版本IE不支持 (ie8)
 
@@ -16,14 +17,24 @@ netty实现的websocket推送框架
 
 [WebSocket协议（RFC6455）的翻译和官网描述地址](https://github.com/zhuangjiesen/reading-learning-coding/blob/master/网络协议/RFC6455%20WebSocket协议.md)
 
+websocket浏览器h5对象，前端api文档 ： https://www.w3.org/TR/websockets/
+
 
 ### 项目目录以及环境配合
 
 #### 因为是个测试项目，所以可能会有别的框架代码，但是不会影响框架环境，也证明了这个框架是0侵入性的，拷进去就能用
 
 
-#### 源码说明
+### 源码说明 
+#### Java代码都在 websocket 目录下，
+#### spring 配置在 spring-netty-websocket.xml
+#### html 测试页面在 html/static 中 
+     1. websocket-push-pl.html 页面是单请求单订阅(单处理器)的实现
+     2. websocket-multi-sub.html 页面是单请求多订阅的实现
 
+
+
+### Java 代码
 ```
 1. server 包
   netty 的serverBootstrap 的启动与端口监听类
@@ -35,6 +46,8 @@ netty实现的websocket推送框架
 调用 requestHandlerMapping 获取对应uri 的 HandlerAdapter 请求处理类
 
 webSocketCacheManager 整个netty 框架中存储和保活的存储层，里面封装了一层dao层，做好存储框架替换的准备
+
+
 
 3. adapter 包
 websocket请求握手成功后，服务端和客户端的通信是基于frame 的(data frame 和 control frame)
@@ -56,16 +69,35 @@ onUpgradeCompleted();
 二. KeepAliveHandlerAdapter 用来处理保活，心跳机制的处理类，同上，也是因为几乎所有用websocket的业务都需要这样的处理，所以也可以封装成父类进行实现，具体保活机制在类的注释上
 
 
-4. chat 和 common 包
+
+======= 这里优化了一个处理类
+SubprotocolHandlerAdapter.java 用来处理单请求多协议的业务实现
+子协议处理类(实现 WSProtocolHandler.java / AbstractProtocolHandler.java )，通过配置注解 @WSProtocol 子协议，和父 uri(默认是/ ) 可以绑定一个请求多个子协议的处理，  SubprotocolHandlerAdapter.java 的处理则是将客户端订阅的protocol 与对应的 WSProtocolHandler 关联，前端的推送能映射到相应的子协议处理器，后端的推送能推给订阅的客户端
+
+4. mapping 包 
+WSRequestHandlerMapping.java 封装了处理单uri 请求和 带子协议的请求映射的处理器
+
+5. chat 和 common 包
 这两个包下的实现类，并不属于框架源码，是作者用来测试不同业务的实现
 chat 包下是实现聊天业务的实现
 common 包下两个类实现了不同的推送订阅的处理
+protocols 包下的 WSProtocolHandler.java 实现类都是对子协议的实现
+
+6.resolver 包
+一些消息类型的处理，升级websocket 请求的处理类 UpgradeResolver.java 
+
+
+7.WSProtocolHandler.java / AbstractProtocolHandler.java 主要处理子协议
+封装推送消息
+public String wrapperPushedMessage(Map<String , Object> params);
+接收到客户端消息
+public void onMessageRecieved(ChannelHandlerContext ctx , JSONObject message);
+连接建立事件
+public void onProtocolRegistyCompleted(ChannelHandlerContext ctx, WebSocketClient webSocketClient);
 
 
 
 ```
-
-
 
 #### 源码目录
 
@@ -86,7 +118,7 @@ jdk1.8
 项目中有个 spring 容器，只需要在应用(或者web 应用)中的spring 上下文引入websocket 的配置即可启动:
 
 ```
-	<import resource="./spring-netty-websocket.xml"/>
+    <import resource="./spring-netty-websocket.xml"/>
 
 ```
 
@@ -141,6 +173,15 @@ frameHandlerAdapter.handleResponse(frameParams);
 locationHandlerAdapter.handleResponse(locParams);
 用来推送服务端消息
 
+子协议推送：WSProtocolHandler.java
+例子 
+IndexProtocolHandler protocolHandler = applicationContext.getBean(IndexProtocolHandler.class);
+Map<String , Object> frameParams = new HashMap();
+String frameMessage = "我是 IndexProtocolHandler 业务推送的数据" + System.currentTimeMillis();
+frameParams.put("message" , frameMessage);
+protocolHandler.pushMessage(frameParams);
+
+
 ```
 
 本来项目
@@ -157,7 +198,8 @@ locationHandlerAdapter.handleResponse(locParams);
 1. 首先服务器设置orign 请求头
 
 #### 方案1：
-请求 websocket 前可以先通过 ajax 请求，后台登陆权限成功通过生成一个 key ,返回前端，前端发起 websocket 请求带上这个token，然后后台就可以验证身份了
+请求 websocket 前可以先通过 ajax
+ 请求，后台登陆权限成功通过生成一个 key ,返回前端，前端发起 websocket 请求带上这个token，然后后台就可以验证身份了
 
 #### 方案2：
 反向代理
@@ -174,3 +216,18 @@ websocket-push-pl.html
 ```
 
 
+
+单请求多订阅前端实现：
+```
+/*
+protocols 是数组，可以传多个
+*/
+var webSocketClient = new WebSocketClient(url ,  protocols );
+
+
+// 例子
+var webSocketClient = new WebSocketClient('ws://127.0.0.1/' ,  ['index' , 'stockInfo'] );
+// 页面 
+websocket-multi-sub.html
+
+```
