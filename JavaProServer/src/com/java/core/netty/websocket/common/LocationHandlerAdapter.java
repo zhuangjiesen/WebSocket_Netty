@@ -1,10 +1,10 @@
 package com.java.core.netty.websocket.common;
 
-import com.java.core.netty.websocket.adapter.KeepAliveHandlerAdapter;
-import com.java.core.netty.websocket.annotation.WSRequestMapping;
-import com.java.core.netty.websocket.cache.WebSocketCacheManager;
-import com.java.core.netty.websocket.cache.WebSocketClient;
-import com.java.core.netty.websocket.utils.MessageUtils;
+import com.dragsun.websocket.adapter.KeepAliveHandlerAdapter;
+import com.dragsun.websocket.annotation.WSRequestMapping;
+import com.dragsun.websocket.cache.WebSocketCacheManager;
+import com.dragsun.websocket.cache.WebSocketClient;
+import com.dragsun.websocket.utils.MessageUtils;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.websocketx.*;
 

@@ -1,5 +1,7 @@
 package com.java.main;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
 
@@ -25,6 +27,15 @@ public class App
 
 
         init();
+
+
+        Log logger = LogFactory.getLog(App.class);
+        if (logger.isDebugEnabled()) {
+            logger.debug("xxxx");
+        } else {
+            logger.debug("xxxx11111");
+        }
+
 
         new Thread(new Runnable() {
 

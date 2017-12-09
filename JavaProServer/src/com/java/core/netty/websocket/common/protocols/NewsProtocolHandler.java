@@ -1,8 +1,8 @@
 package com.java.core.netty.websocket.common.protocols;
 
 import com.alibaba.fastjson.JSONObject;
-import com.java.core.netty.websocket.annotation.WSProtocol;
-import com.java.core.netty.websocket.protocol.AbstractProtocolHandler;
+import com.dragsun.websocket.annotation.WSProtocol;
+import com.dragsun.websocket.protocol.AbstractProtocolHandler;
 import io.netty.channel.ChannelHandlerContext;
 
 import java.util.Map;
@@ -20,7 +20,6 @@ public class NewsProtocolHandler extends AbstractProtocolHandler {
 
     @Override
     protected void handleRecievedMessage(ChannelHandlerContext ctx, JSONObject message) {
-
         System.out.println();
     }
 

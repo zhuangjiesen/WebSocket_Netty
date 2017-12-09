@@ -1,12 +1,12 @@
 package com.java.service;
 
 
-import com.java.core.netty.websocket.adapter.WSHandlerAdapter;
+import com.dragsun.websocket.adapter.WSHandlerAdapter;
 import com.java.core.netty.websocket.common.protocols.IndexProtocolHandler;
 import com.java.core.netty.websocket.common.protocols.LocationProtocolHandler;
 import com.java.core.netty.websocket.common.protocols.NewsProtocolHandler;
 import com.java.core.netty.websocket.common.protocols.StockInfoProtocolHandler;
-import com.java.core.netty.websocket.protocol.WSProtocolHandler;
+import com.dragsun.websocket.protocol.WSProtocolHandler;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
