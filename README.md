@@ -125,7 +125,7 @@ jdk1.8
 #### 源码位置：
 ```
 所有源码都在这个包下
-com.java.core.netty.websocket
+com.dragsun.websocket
 
 注意：
 源码包中的
@@ -231,3 +231,5 @@ var webSocketClient = new WebSocketClient('ws://127.0.0.1/' ,  ['index' , 'stock
 websocket-multi-sub.html
 
 ```
+
+
