@@ -142,6 +142,9 @@ public class WSRequestHandlerMapping implements  ApplicationContextAware , Appli
         init();
         HttpHeaders httpHeaders = request.headers();
         String protocols = httpHeaders.get( WebSocketConstant.SEC_WEBSOCKET_PROTOCOL);
+        if (protocols == null || protocols.equals("null")) {
+            protocols = "";
+        }
         String uri = request.uri();
         uri = MessageUtils.getHttpGetUri(uri);
         WSHandlerAdapter handlerAdapter = null;

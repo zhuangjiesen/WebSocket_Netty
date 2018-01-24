@@ -51,11 +51,22 @@ public class SubprotocolHandlerAdapter extends KeepAliveHandlerAdapter<TextWebSo
             protocol = protocol.substring(1);
         }
         ConcurrentHashMap<String , WebSocketClient > clients = protocolClientsMap.get(protocol);
-        JSONObject jsonMsg = new JSONObject();
-        jsonMsg.put("protocol" , protocol);
-        jsonMsg.put("message" , message);
         if (clients != null && clients.size() > 0) {
-            MessageUtils.sendMessage(clients.values() , jsonMsg.toString());
+            JSONObject jsonMsg = new JSONObject();
+            jsonMsg.put("protocol" , protocol);
+            jsonMsg.put("message" , message);
+            String msg = jsonMsg.toString();
+            Collection<WebSocketClient> clientsList = null;
+            clientsList = clients.values();
+            for (WebSocketClient socketClient : clientsList) {
+                String channelId = socketClient.getChannelHandlerContext().channel().id().asLongText();
+                //判断是否下线,清除相应的客户端
+                if (socketClient.isClosed()) {
+                    clients.remove(channelId);
+                } else {
+                    MessageUtils.sendMessage(socketClient , msg);
+                }
+            }
         }
     }
 

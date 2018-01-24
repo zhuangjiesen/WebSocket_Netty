@@ -41,14 +41,14 @@ public abstract class KeepAliveHandlerAdapter<T extends WebSocketFrame> extends 
     public static ApplicationContext mApplicationContext;
 
     //轮训时间 检测过期连接 定时器定时时间
-    private final static int SCHEDULE_SECONDS = 60;
+    private final static int SCHEDULE_SECONDS = 30;
     private static ScheduledExecutorService scheduleService = Executors.newScheduledThreadPool(1);
 
     /*标记状态*/
     private static volatile boolean isSent = true;
 
     /** 允许保活次数， 超过这个数值认为失联，清理连接**/
-    private static volatile int MAX_RE_PING = 10;
+    private static volatile int MAX_RE_PING = 5;
 
 
 
@@ -84,6 +84,7 @@ public abstract class KeepAliveHandlerAdapter<T extends WebSocketFrame> extends 
                 if (channel.isOpen()) {
                     client.getHandshaker().close(channel , new CloseWebSocketFrame());
                 }
+                client.setClosed(true);
                 webSocketCacheManager.removeWebSocketClient(channel.id().asLongText());
             }
         }

@@ -25,7 +25,7 @@ public class WebSocketTestService implements InitializingBean , ApplicationConte
 
     private static ApplicationContext applicationContext;
 
-    private static ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
+    private static ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(10);
 
     public void pushFrame(){}
     public void pushLocation(){}
@@ -106,7 +106,7 @@ public class WebSocketTestService implements InitializingBean , ApplicationConte
                 }
 
             }
-        } , 1L , 10 , TimeUnit.SECONDS);
+        } , 1L , 300 , TimeUnit.MILLISECONDS);
     }
 
     @Override

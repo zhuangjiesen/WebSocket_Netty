@@ -20,9 +20,11 @@ public class WebSocketClient {
     private WSHandlerAdapter handlerAdapter;
     /*是否有protocol */
     private boolean hasSubProtocols;
+    private boolean isClosed;
     private String uri;
     private String[] protocols;
     private Map<String ,Object> reqParam;
+
 
     public Map<String, Object> getReqParam() {
         return reqParam;
@@ -79,5 +81,13 @@ public class WebSocketClient {
 
     public void setProtocols(String[] protocols) {
         this.protocols = protocols;
+    }
+
+    public boolean isClosed() {
+        return isClosed;
+    }
+
+    public void setClosed(boolean closed) {
+        isClosed = closed;
     }
 }
