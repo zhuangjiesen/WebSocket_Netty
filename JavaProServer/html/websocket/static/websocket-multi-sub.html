@@ -22,23 +22,46 @@
                 <h3>参数 : </h3>
                 <input type="text" name="params" id="params" >
             </div>
-            <h3>订阅主题 protocols : </h3>
+            <h3>订阅主题 topic : </h3>
             <div>
                 <div>
-                    <label for="indexProtocol"  >index</label>
-                    <input type="checkbox" id="indexProtocol" name="protocols" value="index" >
+                    <label for="indexTopic"  >index</label>
+                    <input type="checkbox" id="indexTopic" name="topic" value="index" >
+
+                    <br>
+                    <div>
+                        <input type="text" id="indexTopicContent" value="我是 index 的 message " >
+                        <button data-topic="index" data-id="indexTopicContent"  onclick="sendTopicContent(this);">发送</button>
+                    </div>
                 </div>
-                <div>
-                    <label for="locationProtocol" >location</label>
-                    <input id="locationProtocol" type="checkbox" name="protocols" value="location" >
+                <div style="margin-top: 20px;">
+                    <label for="locationTopic" >location</label>
+                    <input id="locationTopic" type="checkbox" name="topic" value="location" >
+
+                    <br>
+                    <div>
+                        <input type="text" id="locationTopicContent" value="我是 location 的 message " >
+                        <button data-topic="location" data-id="locationTopicContent"  onclick="sendTopicContent(this);">发送</button>
+                    </div>
                 </div>
-                <div>
-                    <label for="newsProtocol" >news</label>
-                    <input id="newsProtocol" type="checkbox" name="protocols" value="news" >
+                <div style="margin-top: 20px;" >
+                    <label for="newsTopic" >news</label>
+                    <input id="newsTopic" type="checkbox" name="topic" value="news" >
+
+                    <br>
+                    <div>
+                        <input type="text" id="newsTopicContent" value="我是 news 的 message " >
+                        <button data-topic="news" data-id="newsTopicContent"  onclick="sendTopicContent(this);">发送</button>
+                    </div>
                 </div>
-                <div>
-                    <label for="stockInfoProtocol"  >stockInfo</label>
-                    <input id="stockInfoProtocol" type="checkbox" name="protocols" value="stockInfo" >
+                <div style="margin-top: 20px;" >
+                    <label for="stockInfoTopic"  >stockInfo</label>
+                    <input id="stockInfoTopic" type="checkbox" name="topic" value="stockInfo" >
+                    <br>
+                    <div>
+                        <input type="text" id="stockInfoopicContent" value="我是 stockInfo 的 message " >
+                        <button data-topic="stockInfo" data-id="stockInfoopicContent"  onclick="sendTopicContent(this);">发送</button>
+                    </div>
                 </div>
             </div>
             <br>
@@ -48,7 +71,7 @@
 </div>
 
 <div style="position: relative; left : 100px;"  >
-    <div>订阅目录</div>
+    <div>订阅结果</div>
     <div id="subscribeList">
 
 
@@ -61,63 +84,47 @@
 
 </body>
 <script type="text/javascript" src="../js/jquery-1.12.0.js"></script>
-<script type="text/javascript" src="../js/location-message-ws.js"></script>
+<script type="text/javascript" src="../js/ws-util.js"></script>
 <script type="text/javascript" >
+    var wsClient = null;
+
+    function sendTopicContent(item) {
+        var dataid = $(item).attr('data-id');
+        var topic = $(item).attr('data-topic');
+        var value = $('#' + dataid).val();
+        wsClient.sendByTopic(topic , value);
+    }
 
 
     $(document).ready(function () {
     });
 
     function onSubUri(item){
-        var protocols = [] ;
-        $("input[name='protocols']:checkbox:checked").each(function(){
-            protocols.push($(this).val()) ;
+        var topics = [] ;
+        $("input[name='topic']:checkbox:checked").each(function(){
+            topics.push($(this).val()) ;
         })
-        var targetName = $(item).parent().find('.targetName').text();
-        var targetUri = $(item).parent().find('.targetUri').text();
-        var params = $('#params').val();
-        subUri(targetUri , protocols , params);
-        $('#subscribeList').append('<ul id="defaultUri"> ' + '<font style="color: red">' + targetName + '</font>' + ' </ul>')
-    }
 
-    function subUri(uri , protocols , params){
-        //走反向代理
-//        var url = 'ws://127.0.0.1:11024/';
+
         var url = 'ws://127.0.0.1:38888/';
-        if (params && params.length > 0) {
-            url = url + '?' + params;
-        }
-        var webSocketClient = new WebSocketClient(url ,  protocols );
-        webSocketClient.registMessageListener(function(message) {
-            // debugger
-            var data = message.data;
-            var type = message.type;
-            // 后台发送的消息
-            if (data && type == 'message' && data.length > 0 ) {
-                // console.log('data : ' + data)
-
-                console.log('data : ' + data)
-                $('#defaultUri').append('<li>' + data + '</li>')
-            } else {
-                // console.log(' ping pong hit .....')
-            }
-            // console.log('------消息到达 message : ' , message );
-        });
-        webSocketClient.registCloseEventListener(function(event) {
-            // console.log('------close message : ' , event);
-        });
-        webSocketClient.onError(function(data) {
-            // console.log('------onError message : ' , event);
-        });
-
-        webSocketClient.init(null , function (success, message) {
-            // console.log('success : ' + success + '  message : ' + message);
-            if (success) {
-            } else {
-
+        wsClient = new WsClient( url , null );
+        var option = {};
+        //获取连接
+        wsClient.connect(option , function (client) {
+            //订阅
+            for( var i = 0 ; i < topics.length ; i ++) {
+                client.subscribe( topics[i], function (greeting) {
+                    console.log('greeting : ' + greeting)
+                    $('#subscribeList').append('<li>' + greeting + '</li>')
+                });
             }
         });
+
+
+
+
     }
+
 
 </script>
 </html>

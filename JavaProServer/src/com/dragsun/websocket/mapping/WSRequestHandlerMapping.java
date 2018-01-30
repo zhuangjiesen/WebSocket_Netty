@@ -1,18 +1,17 @@
 package com.dragsun.websocket.mapping;
 
-import com.dragsun.websocket.adapter.SubprotocolHandlerAdapter;
+import com.dragsun.websocket.adapter.TopicHandlerAdapter;
 import com.dragsun.websocket.adapter.WSHandlerAdapter;
-import com.dragsun.websocket.annotation.WSProtocol;
 import com.dragsun.websocket.annotation.WSRequestMapping;
+import com.dragsun.websocket.annotation.WSTopic;
 import com.dragsun.websocket.cache.WebSocketCacheManager;
 import com.dragsun.websocket.cache.WebSocketClient;
 import com.dragsun.websocket.constant.WebSocketConstant;
-import com.dragsun.websocket.protocol.WSProtocolHandler;
+import com.dragsun.websocket.topic.WSTopicHandler;
 import com.dragsun.websocket.utils.MessageUtils;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaders;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
@@ -23,9 +22,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.PostConstruct;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -74,39 +70,34 @@ public class WSRequestHandlerMapping implements  ApplicationContextAware , Appli
                         }
                     }
 
-                    //初始化带子协议的请求处理器
-                    String[] protocolHandlerNames = applicationContext.getBeanNamesForType(WSProtocolHandler.class);
-                    if (protocolHandlerNames != null && protocolHandlerNames.length > 0) {
-                        for (String protocolHandlerName : protocolHandlerNames ) {
-                            WSProtocolHandler protocolHandler = applicationContext.getBean(protocolHandlerName ,WSProtocolHandler.class );
-                            WSProtocol protocolAnnotation = protocolHandler.getClass().getAnnotation(WSProtocol.class);
-                            if (protocolAnnotation != null) {
+
+                    String[] topicHandlerNames = applicationContext.getBeanNamesForType(WSTopicHandler.class);
+                    if (topicHandlerNames != null && topicHandlerNames.length > 0) {
+                        for (String topicHandlerName : topicHandlerNames ) {
+                            WSTopicHandler topicHandler = applicationContext.getBean(topicHandlerName ,WSTopicHandler.class );
+
+                            WSTopic topicAnnotation = topicHandler.getClass().getAnnotation(WSTopic.class);
+                            if (topicAnnotation != null) {
                                 // 已经有单uri 请求的处理器了 WSHandlerAdapter
-                                String uri = protocolAnnotation.uri();
-                                SubprotocolHandlerAdapter subprotocolHandlerAdapter = null;
+                                String uri = topicAnnotation.uri();
+                                String topic = topicAnnotation.topic();
+
+                                TopicHandlerAdapter topicHandlerAdapter = null;
                                 WSHandlerAdapter handlerAdapter = uriAndHandlerAdapterMap.get(uri);
                                 if (handlerAdapter == null) {
+                                    //在spring 中注册一个 WSHandlerAdapter 的 bean
                                     GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
-                                    beanDefinition.setBeanClass(SubprotocolHandlerAdapter.class);
-                                    String beanName = uri + "_" + SubprotocolHandlerAdapter.class.getName();
+                                    beanDefinition.setBeanClass(TopicHandlerAdapter.class);
+                                    String beanName = uri + "_" + TopicHandlerAdapter.class.getName();
                                     beanRegistry.registerBeanDefinition(beanName ,beanDefinition );
-                                    subprotocolHandlerAdapter = applicationContext.getBean(beanName ,SubprotocolHandlerAdapter.class );
-                                    uriAndHandlerAdapterMap.put(uri , subprotocolHandlerAdapter);
-                                } else if (handlerAdapter instanceof SubprotocolHandlerAdapter) {
-                                    subprotocolHandlerAdapter = (SubprotocolHandlerAdapter)handlerAdapter;
+                                    topicHandlerAdapter = applicationContext.getBean(beanName ,TopicHandlerAdapter.class );
+                                    uriAndHandlerAdapterMap.put(uri , topicHandlerAdapter);
+                                } else if (handlerAdapter instanceof TopicHandlerAdapter) {
+                                    topicHandlerAdapter = (TopicHandlerAdapter)handlerAdapter;
                                 } else {
                                     throw new RuntimeException("已经有uri : " + uri + " 的请求处理器");
                                 }
-                                subprotocolHandlerAdapter.addProtocolHandler(protocolHandler);
-
-                                if ((subprotocolHandlerAdapter = (SubprotocolHandlerAdapter)uriAndHandlerAdapterMap.get(uri)) == null) {
-                                    GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
-                                    beanDefinition.setBeanClass(SubprotocolHandlerAdapter.class);
-                                    String beanName = uri + "_" + SubprotocolHandlerAdapter.class.getName();
-                                    beanRegistry.registerBeanDefinition(beanName ,beanDefinition );
-                                    subprotocolHandlerAdapter = applicationContext.getBean(beanName ,SubprotocolHandlerAdapter.class );
-                                    uriAndHandlerAdapterMap.put(uri , subprotocolHandlerAdapter);
-                                }
+                                topicHandlerAdapter.subscribeHandler(topic ,topicHandler );
                             }
                         }
                     }
@@ -138,7 +129,7 @@ public class WSRequestHandlerMapping implements  ApplicationContextAware , Appli
     * 为请求注册请求处理器
     *
     * */
-    public void registHandlerAdapter(FullHttpRequest request , String channelId ,  WebSocketClient webSocketClient ) {
+    public void registHandlerAdapter(FullHttpRequest request , WebSocketClient webSocketClient ) {
         init();
         HttpHeaders httpHeaders = request.headers();
         String protocols = httpHeaders.get( WebSocketConstant.SEC_WEBSOCKET_PROTOCOL);
@@ -149,26 +140,8 @@ public class WSRequestHandlerMapping implements  ApplicationContextAware , Appli
         uri = MessageUtils.getHttpGetUri(uri);
         WSHandlerAdapter handlerAdapter = null;
         if (StringUtils.hasLength(uri)) {
-            if (StringUtils.hasLength(protocols)) {
-                handlerAdapter = uriAndHandlerAdapterMap.get(uri);
-                if (handlerAdapter != null) {
-                    if (handlerAdapter instanceof SubprotocolHandlerAdapter) {
-                        SubprotocolHandlerAdapter subHandlerAdapter = (SubprotocolHandlerAdapter)handlerAdapter;
-                        String[] protocolArr = protocols.split(",");
-                        webSocketClient.setProtocols(protocolArr);
-                        for (String protocol : protocolArr) {
-                            if (subHandlerAdapter.getProtocolHandler(protocol.trim()) == null) {
-                                throw new RuntimeException("未找到合适的请求处理器 protocol : " + protocol);
-                            }
-                        }
-                    } else {
-                        throw new RuntimeException("未找到合适的请求处理器 : " + uri);
-                    }
-                }
-            } else {
-                if ((handlerAdapter = getFrameHandlerAdapterByUri(uri)) == null) {
-                    throw new RuntimeException("未找到合适的请求处理器 : " + uri);
-                }
+            if ((handlerAdapter = getFrameHandlerAdapterByUri(uri)) == null) {
+                throw new RuntimeException("未找到合适的请求处理器 : " + uri);
             }
         }
         webSocketClient.setHandlerAdapter(handlerAdapter);
@@ -183,8 +156,6 @@ public class WSRequestHandlerMapping implements  ApplicationContextAware , Appli
     public void initHandlerAdapter(String uri , WSHandlerAdapter handlerAdapter ) {
         uriAndHandlerAdapterMap.put(uri , handlerAdapter);
     }
-
-
 
 
     @Override

@@ -46,7 +46,7 @@ public class WebSocketChannelHandler  extends ChannelInboundHandlerAdapter {
             String id = getChannelCtxId(ctx);
             //先注册请求处理器
             try {
-                requestHandlerMapping.registHandlerAdapter(request , id , webSocketClient);
+                requestHandlerMapping.registHandlerAdapter(request ,  webSocketClient);
             } catch (Exception e) {
                 LogUtils.logError(this , e);
                 //处理异常 没有具体映射的请求处理器

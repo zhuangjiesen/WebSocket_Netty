@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration>
+<!-- 
+http://www.open-open.com/lib/view/open1410875670398.html
+jar文件： 
+1）log4j-1.2.15.jar 这是log4j的库。 Slf4j并不改变这个底层实现库。 
+2）slf4j-api-1.5.2.jar   这是Slf4j库。  
+3）slf4j-log4j12-1.5.2.jar 这包含Log4j的适配器和静态绑定log4j底层实现。 
+4）jcl-over-slf4j-1.5.2.jar 这提供了Commons-Logging接口，以及使用common-loggin的接口，底层还是由SLF4J来决定哪种实现机制 。 
+-->
+<configuration scan="true" scanPeriod="3600 seconds" debug="false"><!-- 最全参考文档http://www.cnblogs.com/luowei010101/archive/2012/01/04/2312438.html -->
+  
+  <!-- 尽量别用绝对路径，如果带参数不同容器路径解释可能不同 -->  
+  	<property name="LOG_HOME" value="logs/"/>     
+  	<property name="appName" value="JavaProServer"/>
+    <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+    <!-- 
+     	<filter class="com.java.core.log.MyLogFilter" />
+     -->
+        <encoder>
+            <pattern>%d{H:mm} %-5level [%logger{16}] %msg%n</pattern>
+        </encoder>
+    </appender>
+  
+  
+    <!-- 按照每天生成日志文件 
+    -->  
+    <appender name="FILE" 
+        class="ch.qos.logback.core.rolling.RollingFileAppender">  
+        <Encoding>UTF-8</Encoding>  
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">  
+            <FileNamePattern>${LOG_HOME}/${appName}-%d{yyyy-MM-dd}.log</FileNamePattern>  
+            <MaxHistory>30</MaxHistory>  
+        </rollingPolicy>  
+        <layout class="ch.qos.logback.classic.PatternLayout">  
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n  
+            </pattern>  
+       </layout>  
+    </appender>   
+    
+    <appender name="FILE-ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender"><!-- 每天生成一个新的日志文件 -->    
+        <Encoding>UTF-8</Encoding> 
+    	<filter class="ch.qos.logback.classic.filter.LevelFilter">   
+      		<level>ERROR</level>   
+      		<onMatch>ACCEPT</onMatch>   
+   			<onMismatch>DENY</onMismatch>   
+    	</filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">  
+            <FileNamePattern>${LOG_HOME}/${appName}-error-%d{yyyy-MM-dd}.log</FileNamePattern>  
+            <MaxHistory>30</MaxHistory><!-- (删除30天以前的日志,保障硬盘不会被占满)自动删除过期的日志归档文件 -->
+        </rollingPolicy>  
+       <layout class="ch.qos.logback.classic.PatternLayout">  
+            <pattern>[%c] %d{HH:mm:ss.SSS} [%thread] [time:%r] [line:%l] %-5level %logger{50} - %msg%n  
+            </pattern>  
+       </layout> 
+    </appender>
+    
+    
+   	<appender name="FILE-DEBUG" class="ch.qos.logback.core.rolling.RollingFileAppender"><!-- 每天生成一个新的日志文件 -->    
+        <Encoding>UTF-8</Encoding> 
+    	<filter class="ch.qos.logback.classic.filter.LevelFilter">   
+      		<level>DEBUG</level>   
+      		<onMatch>ACCEPT</onMatch>   
+   			<onMismatch>DENY</onMismatch>   
+    	</filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">  
+            <FileNamePattern>${LOG_HOME}/${appName}-debug-%d{yyyy-MM-dd}.log</FileNamePattern>  
+            <MaxHistory>30</MaxHistory><!-- (删除30天以前的日志,保障硬盘不会被占满)自动删除过期的日志归档文件 -->
+        </rollingPolicy>  
+        <layout class="ch.qos.logback.classic.PatternLayout">  
+            <pattern>[%c] %d{HH:mm:ss.SSS} [%thread] [time:%r] [line:%l] %-5level %logger{50} - %msg%n  
+            </pattern>  
+       </layout> 
+    </appender>
+    
+     <root level="info"> <!-- root将级别为“INFO”及大于“INFO”的日志信息交给已经配置好的名为“Console”的appender处理，“Console”appender将信息打印到Console； -->
+        <appender-ref ref="Console" />
+         <!-- 标识这个appender将会添加到这个logger -->
+        <!-- 
+        <appender-ref ref="FILE-ERROR" />
+        <appender-ref ref="FILE-DEBUG" />
+        <appender-ref ref="FILE" />
+         -->
+    </root>
+    
+  
+    <logger name="com.java" level="DEBUG"/>
+    <logger name="com.java.core.exception.MySimpleMappingExceptionResolver" level="ERROR"/>
+    <logger name="com.java.utils.MyFreeMarkerView" level="ERROR"/>
+    
+    <logger name="org.apache.shiro" level="ERROR"/>
+    <logger name="org.apache.shiro.web" level="ERROR"/>
+    <logger name="org.apache.shiro.realm.AuthorizingRealm" level="ERROR"/>
+    <logger name="org.apache.shiro.web.servlet" level="ERROR"/>
+    <logger name="org.apache.shiro.spring.web.ShiroFilterFactoryBean" level="ERROR"/>
+    <logger name="org.apache.shiro.spring.LifecycleBeanPostProcessor" level="ERROR"/>
+    <logger name="org.apache.shiro.cache.ehcache.EhCacheManager" level="ERROR"/>
+    <logger name="com.danga" level="WARN"/>
+    <logger name="com.danga.MemCached.MemCachedClient" level="DEBUG"/>
+    <logger name="net.rubyeye.xmemcached" level="ERROR"/>
+    <logger name="com.google.code.yanf4j" level="ERROR"/>
+    <logger name="org.apache.ibatis.logging" level="ERROR"/>
+    <logger name="org.mybatis.spring" level="ERROR"/>
+    <logger name="com.ibatis" level="ERROR"/>
+    <logger name="com.ibatis.common.jdbc.SimpleDataSource" level="ERROR"/>
+    <logger name="com.ibatis.common.jdbc.ScriptRunner" level="ERROR"/>
+    <logger name="com.ibatis.sqlmap.engine.impl.SqlMapClientDelegate" level="ERROR"/>
+    <logger name="java.sql.Connection" level="ERROR"/>
+    <logger name="java.sql.Statement" level="ERROR"/>
+    <logger name="java.sql.PreparedStatement" level="ERROR"/>
+    <logger name="java.sql.ResultSet" level="ERROR"/>
+    <logger name="com.alibaba.druid" level="ERROR"/>
+    <logger name="org.springframework.cache.ehcache" level="ERROR"/>
+    <logger name="org.apache.axis2" level="ERROR"/>
+    <logger name="net.sf.ehcache" level="ERROR"/>
+    <logger name="org.springframework" level="ERROR"/>
+    <logger name="org.springframework.web" level="ERROR"/>
+    <logger name="org.springframework.web.servlet.DispatcherServlet" level="ERROR"/>
+    <logger name="org.springframework.scheduling.quartz" level="ERROR"/>
+    <logger name="org.springframework.ui.freemarker" level="ERROR"/>
+    <logger name="org.quartz" level="ERROR"/>
+    <logger name="freemarker" level="ERROR"/>
+    <logger name="freemarker.log" level="ERROR"/>
+    <logger name="org.springframework.web.servlet.view.freemarker" level="ERROR"/>
+    <logger name="org.aspectj" level="ERROR"/>
+    <logger name="org.apache.http" level="ERROR"/>
+</configuration>

@@ -24,8 +24,7 @@
     <orderEntry type="library" name="Maven: org.springframework.data:spring-data-commons:1.12.2.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-expression:3.1.4.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-jdbc:3.1.4.RELEASE" level="project" />
-    <orderEntry type="library" name="Maven: org.springframework:spring-jms:4.1.6.RELEASE" level="project" />
-    <orderEntry type="library" name="Maven: org.springframework:spring-messaging:4.1.6.RELEASE" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework:spring-jms:3.1.4.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-tx:3.1.4.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-web:3.1.4.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-webmvc:3.1.4.RELEASE" level="project" />
@@ -88,10 +87,6 @@
     <orderEntry type="library" name="Maven: com.qiniu:qiniu-java-sdk:7.1.0" level="project" />
     <orderEntry type="library" name="Maven: com.squareup.okhttp3:okhttp:3.2.0" level="project" />
     <orderEntry type="library" name="Maven: com.squareup.okio:okio:1.6.0" level="project" />
-    <orderEntry type="library" name="Maven: com.alibaba:dubbo:2.5.3" level="project" />
-    <orderEntry type="library" name="Maven: org.springframework:spring:2.5.6.SEC03" level="project" />
-    <orderEntry type="library" name="Maven: org.javassist:javassist:3.15.0-GA" level="project" />
-    <orderEntry type="library" name="Maven: org.jboss.netty:netty:3.2.5.Final" level="project" />
     <orderEntry type="library" name="Maven: com.101tec:zkclient:0.2" level="project" />
     <orderEntry type="library" name="Maven: org.apache.zookeeper:zookeeper:3.3.1" level="project" />
     <orderEntry type="library" name="Maven: org.apache.hadoop:zookeeper:3.3.1" level="project" />
@@ -107,6 +102,10 @@
     <orderEntry type="library" name="Maven: asm:asm-tree:3.3.1" level="project" />
     <orderEntry type="library" name="Maven: asm:asm-util:3.3.1" level="project" />
     <orderEntry type="library" name="Maven: io.netty:netty-all:4.1.11.Final" level="project" />
+    <orderEntry type="library" name="Maven: com.alibaba:dubbo:2.5.3" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework:spring:2.5.6.SEC03" level="project" />
+    <orderEntry type="library" name="Maven: org.javassist:javassist:3.15.0-GA" level="project" />
+    <orderEntry type="library" name="Maven: org.jboss.netty:netty:3.2.5.Final" level="project" />
     <orderEntry type="library" name="Maven: javax.jms:jms:1.1" level="project" />
     <orderEntry type="library" name="Maven: org.apache.activemq:activemq-all:5.14.1" level="project" />
     <orderEntry type="library" name="Maven: org.mortbay.jetty:jetty:6.1.26" level="project" />

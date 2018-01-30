@@ -15,11 +15,10 @@
 #### 有时候需要网页和手机端都要一致推送协议，则手机客户端也可能需要实现websocket推送
 
 
-
-
-[WebSocket协议（RFC6455）的翻译和官网描述地址](https://github.com/zhuangjiesen/reading-learning-coding/blob/master/网络协议/RFC6455%20WebSocket协议.md)
-
+[WebSocket协议（RFC6455）的翻译和官网描述地址]
 websocket浏览器h5对象，前端api文档 ： https://www.w3.org/TR/websockets/
+
+
 ### 项目目录以及环境配合
 
 #### 因为是个测试项目，所以可能会有别的框架代码，但是不会影响框架环境，也证明了这个框架是0侵入性的，拷进去就能用
@@ -217,6 +216,10 @@ websocket-push-pl.html
 
 单请求多订阅前端实现：
 ```
+/*
+protocols 是数组，可以传多个
+*/
+var webSocketClient = new WebSocketClient(url ,  protocols );
 
 
 // 例子
@@ -240,13 +243,4 @@ wsClient.connect(option , function (client) {
 // 页面 
 websocket-multi-sub.html
 
-
-//聊天业务的实现
-websocket-chat-test.html
-//后端实现
-ChatOnlineListTopicHandler.java
-ChatTopicHandler.java
-
 ```
-
-

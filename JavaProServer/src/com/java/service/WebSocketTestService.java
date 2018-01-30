@@ -2,11 +2,7 @@ package com.java.service;
 
 
 import com.dragsun.websocket.adapter.WSHandlerAdapter;
-import com.java.core.netty.websocket.common.protocols.IndexProtocolHandler;
-import com.java.core.netty.websocket.common.protocols.LocationProtocolHandler;
-import com.java.core.netty.websocket.common.protocols.NewsProtocolHandler;
-import com.java.core.netty.websocket.common.protocols.StockInfoProtocolHandler;
-import com.dragsun.websocket.protocol.WSProtocolHandler;
+import com.dragsun.websocket.utils.MessageUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
@@ -41,6 +37,27 @@ public class WebSocketTestService implements InitializingBean , ApplicationConte
                 System.out.println("WebSocketTestService .....定时发送消息....");
 
                 try {
+                    {
+                        String frameMessage = "我是 index 默认业务推送的数据" + System.currentTimeMillis();
+                        MessageUtils.sendMessage("index" , frameMessage );
+                    }
+
+                    {
+                        String frameMessage = "我是 location 默认业务推送的数据" + System.currentTimeMillis();
+                        MessageUtils.sendMessage("location" ,frameMessage);
+                    }
+
+                    {
+                        String frameMessage = "我是 news 默认业务推送的数据" + System.currentTimeMillis();
+                        MessageUtils.sendMessage("news" ,frameMessage);
+                    }
+
+                    {
+                        String frameMessage = "我是 stockInfo 默认业务推送的数据" + System.currentTimeMillis();
+                        MessageUtils.sendMessage("stockInfo" , frameMessage);
+                    }
+
+
 
 
                     //默认推送
@@ -62,37 +79,6 @@ public class WebSocketTestService implements InitializingBean , ApplicationConte
                     }
 
 
-                    {
-                        IndexProtocolHandler protocolHandler = applicationContext.getBean(IndexProtocolHandler.class);
-                        Map<String , Object> frameParams = new HashMap();
-                        String frameMessage = "我是 IndexProtocolHandler 业务推送的数据" + System.currentTimeMillis();
-                        frameParams.put("message" , frameMessage);
-                        protocolHandler.pushMessage(frameParams);
-                    }
-
-                    {
-                        LocationProtocolHandler protocolHandler = applicationContext.getBean(LocationProtocolHandler.class);
-                        Map<String , Object> frameParams = new HashMap();
-                        String frameMessage = "我是 LocationProtocolHandler 业务推送的数据" + System.currentTimeMillis();
-                        frameParams.put("message" , frameMessage);
-                        protocolHandler.pushMessage(frameParams);
-                    }
-                    {
-                        NewsProtocolHandler protocolHandler = applicationContext.getBean(NewsProtocolHandler.class);
-                        Map<String , Object> frameParams = new HashMap();
-                        String frameMessage = "我是 NewsProtocolHandler 业务推送的数据" + System.currentTimeMillis();
-                        frameParams.put("message" , frameMessage);
-                        protocolHandler.pushMessage(frameParams);
-                    }
-                    {
-                        StockInfoProtocolHandler protocolHandler = applicationContext.getBean(StockInfoProtocolHandler.class);
-                        Map<String , Object> frameParams = new HashMap();
-                        String frameMessage = "我是 StockInfoProtocolHandler 业务推送的数据" + System.currentTimeMillis();
-                        frameParams.put("message" , frameMessage);
-                        protocolHandler.pushMessage(frameParams);
-                    }
-
-
 
 //                    WSHandlerAdapter chatOnlineListHandlerAdapter = applicationContext.getBean("chatOnlineListHandlerAdapter" , WSHandlerAdapter.class);
 //                    chatOnlineListHandlerAdapter.handleResponse(null);
@@ -106,7 +92,7 @@ public class WebSocketTestService implements InitializingBean , ApplicationConte
                 }
 
             }
-        } , 1L , 300 , TimeUnit.MILLISECONDS);
+        } , 1L , 5 , TimeUnit.SECONDS);
     }
 
     @Override

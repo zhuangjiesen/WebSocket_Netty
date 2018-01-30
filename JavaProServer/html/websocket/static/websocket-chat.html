@@ -12,6 +12,11 @@
 
 <div style="position: relative; left: 20px;">
     <div>
+        <h3>当前用户</h3>
+        <ul id="currentUser">
+        </ul>
+    </div>
+    <div>
         <h3>在线人员</h3>
         <ul id="onlineList">
         </ul>
@@ -37,110 +42,196 @@
 
 </body>
 <script type="text/javascript" src="../js/jquery-1.12.0.js"></script>
-<script type="text/javascript" src="../js/location-message-ws.js"></script>
+<script type="text/javascript" src="../js/ws-util.js"></script>
 <script type="text/javascript" >
 
-
+    var wsClient = null;
     $(document).ready(function () {
-        //走反向代理
-        var url = 'ws://127.0.0.1:38888/chat.do';
-        var webSocketClient = new WebSocketClient(url , 'index.do');
-        webSocketClient.registMessageListener(function(message) {
-            // debugger
-            var data = message.data;
-            var type = message.type;
-            // 后台发送的消息
-            if (data && type == 'message' && data.length > 0 ) {
-                // console.log('data : ' + data)
+        var url = 'ws://127.0.0.1:38888/';
+        wsClient = new WsClient( url , null );
+        wsClient.defaultListener = function(message) {
+            debugger
+            console.log(' defaultListener : ' , message)
 
-                console.log('data : ' + data);
-                var sendContent = JSON.parse(data);
-                if (sendContent.type == 0) {
-                    var id = sendContent.id;
-                    $('#' + id).css('color' , 'red');
-                } else if (sendContent.type && sendContent.type == 1){
+            var html = '';
+            var content = message.content ;
+            var sendId = message.sendUserId ;
+            var span1 = '<div>发送人: ' + sendId + '</div>'
+            var span2 = '<div>收到内容: ' + content + '</div>'
+            html = '<li>' + span1 + span2 +'</li>'
+            $('#contentList').append(html)
+        };
+
+        var option = {};
+        //获取连接
+        wsClient.connect(option , function (client) {
+            //订阅
+            client.subscribe( 'chat', function (greeting) {
+                console.log(' chat greeting : ' + greeting)
+            });
+
+
+            client.subscribe( 'chatOnlineList', function (greeting) {
+                debugger
+                var body = JSON.parse(greeting);
+                var chatOnlineList = body.chatOnlineList;
+                var currentUser = body.currentUser;
+                var muser = $('#currentUserLi').text();
+                if (currentUser && (!muser) && muser.length == 0) {
+
                     var html = '';
-                    var content = sendContent.content ;
-                    var sendId = sendContent.sendId ;
-                    var span1 = '<div>发送人: ' + sendId + '</div>'
-                    var span2 = '<div>收到内容: ' + content + '</div>'
-                    html = '<li>' + span1 + span2 +'</li>'
-                    $('#contentList').append(html)
+                    html = '<li id="currentUserLi">' + currentUser +'</li>'
+                    $('#currentUser').append(html);
+                    muser = $('#currentUserLi').text();
                 }
-            } else {
-                // console.log(' ping pong hit .....')
-            }
-            // console.log('------消息到达 message : ' , message );
-        });
-        webSocketClient.registCloseEventListener(function(event) {
-            // console.log('------close message : ' , event);
-        });
-        webSocketClient.onError(function(data) {
-            // console.log('------onError message : ' , event);
+
+                if (chatOnlineList) {
+                    $('#onlineList').html('');
+                    for (var i = 0 ; i < chatOnlineList.length ; i++) {
+                        var item = chatOnlineList[i];
+                        if ((!muser) && muser.length == 0 || item != muser) {
+                            html = '';
+                            html = '<li data-id="' + item + '">' + item +'</li>'
+                            $('#onlineList').append(html)
+                        }
+                    }
+                }
+                debugger
+                if (muser) {
+                    $('li[data-id="' + muser + '"]').remove();
+                }
+                console.log(' chatOnlineList greeting : ' + greeting)
+            });
         });
 
-        webSocketClient.init(null , function (success, message) {
-            // console.log('success : ' + success + '  message : ' + message);
-            if (success) {
-            } else {
 
-            }
-        });
 
         $('#sendBtn').on('click' , function(){
+            debugger
             var targetId = $('#targetId').val();
             var content = $('#content').val();
             var chatContent = {};
             chatContent.content = content;
             chatContent.targetId = targetId;
-            webSocketClient.send(JSON.stringify(chatContent));
+            var muser = $('#currentUserLi').text();
+            chatContent.sendUserId = muser;
+            wsClient.sendByTopic("chat" , JSON.stringify(chatContent));
 
         })
 
-        getOnlienList();
-        function getOnlienList() {
-            //走反向代理
-            var url = 'ws://127.0.0.1:38888/chatOnlineList.do';
-            var webSocketClient = new WebSocketClient(url , 'chatOnlineList.do');
-            webSocketClient.registMessageListener(function(message) {
-                // debugger
-                var data = message.data;
-                var type = message.type;
-                // 后台发送的消息
-                if (data && type == 'message' && data.length > 0 ) {
-                    // console.log('data : ' + data)
 
-                    console.log('data : ' + data)
-                    var onlineList = JSON.parse(data);
-                    $('#onlineList').html('');
 
-                    for (key in onlineList) {
-                        var html = ' '
-                        html = '<li id="'+ key +'">' + key + '</li>'
-                        $('#onlineList').append(html);
-                    }
+/*
 
-                } else {
-                    // console.log(' ping pong hit .....')
-                }
-                // console.log('------消息到达 message : ' , message );
-            });
-            webSocketClient.registCloseEventListener(function(event) {
-                // console.log('------close message : ' , event);
-            });
-            webSocketClient.onError(function(data) {
-                // console.log('------onError message : ' , event);
-            });
 
-            webSocketClient.init(null , function (success, message) {
-                // console.log('success : ' + success + '  message : ' + message);
-                if (success) {
-                } else {
 
-                }
-            });
 
-        }
+
+ //走反向代理
+ var url = 'ws://127.0.0.1:38888/chat';
+ var webSocketClient = new WebSocketClient(url , null);
+ webSocketClient.registMessageListener(function(message) {
+ // debugger
+ var data = message.data;
+ var type = message.type;
+ // 后台发送的消息
+ if (data && type == 'message' && data.length > 0 ) {
+ // console.log('data : ' + data)
+
+ debugger
+ console.log('data : ' + data);
+ var sendContent = JSON.parse(data);
+ if (sendContent.type == 0) {
+ var id = sendContent.id;
+ $('#' + id).css('color' , 'red');
+ } else if (sendContent.type && sendContent.type == 1){
+ var html = '';
+ var content = sendContent.content ;
+ var sendId = sendContent.sendId ;
+ var span1 = '<div>发送人: ' + sendId + '</div>'
+ var span2 = '<div>收到内容: ' + content + '</div>'
+ html = '<li>' + span1 + span2 +'</li>'
+ $('#contentList').append(html)
+ }
+ } else {
+ // console.log(' ping pong hit .....')
+ }
+ // console.log('------消息到达 message : ' , message );
+ });
+ webSocketClient.registCloseEventListener(function(event) {
+ // console.log('------close message : ' , event);
+ });
+ webSocketClient.onError(function(data) {
+ // console.log('------onError message : ' , event);
+ });
+
+ webSocketClient.init(null , function (success, message) {
+ // console.log('success : ' + success + '  message : ' + message);
+ if (success) {
+ } else {
+
+ }
+ });
+
+ $('#sendBtn').on('click' , function(){
+ var targetId = $('#targetId').val();
+ var content = $('#content').val();
+ var chatContent = {};
+ chatContent.content = content;
+ chatContent.targetId = targetId;
+ webSocketClient.send(JSON.stringify(chatContent));
+
+ })
+
+ getOnlienList();
+ function getOnlienList() {
+ //走反向代理
+ var url = 'ws://127.0.0.1:38888/chatOnlineList';
+ var webSocketClient = new WebSocketClient(url , null);
+ webSocketClient.registMessageListener(function(message) {
+ // debugger
+ var data = message.data;
+ var type = message.type;
+ // 后台发送的消息
+ if (data && type == 'message' && data.length > 0 ) {
+ // console.log('data : ' + data)
+ debugger
+
+ console.log('data : ' + data)
+ var onlineList = JSON.parse(data);
+ $('#onlineList').html('');
+
+ for (key in onlineList) {
+ var html = ' '
+ html = '<li id="'+ key +'">' + key + '</li>'
+ $('#onlineList').append(html);
+ }
+
+ } else {
+ // console.log(' ping pong hit .....')
+ }
+ // console.log('------消息到达 message : ' , message );
+ });
+ webSocketClient.registCloseEventListener(function(event) {
+ // console.log('------close message : ' , event);
+ });
+ webSocketClient.onError(function(data) {
+ // console.log('------onError message : ' , event);
+ });
+
+ webSocketClient.init(null , function (success, message) {
+ // console.log('success : ' + success + '  message : ' + message);
+ if (success) {
+ } else {
+
+ }
+ });
+
+ }
+
+
+*
+* */
         
         
     });

@@ -23,6 +23,7 @@ public class WebSocketClient {
     private boolean isClosed;
     private String uri;
     private String[] protocols;
+    private Set<String> topics;
     private Map<String ,Object> reqParam;
 
 
@@ -89,5 +90,14 @@ public class WebSocketClient {
 
     public void setClosed(boolean closed) {
         isClosed = closed;
+    }
+
+
+    public Set<String> getTopics() {
+        return topics;
+    }
+
+    public void setTopics(Set<String> topics) {
+        this.topics = topics;
     }
 }

@@ -66,6 +66,7 @@ public class WebSocketNettyServer {
                         }
                     });
 
+
                     ChannelFuture f = bootstrap.bind(port).sync();
                     if (f.isSuccess()) {
                     }

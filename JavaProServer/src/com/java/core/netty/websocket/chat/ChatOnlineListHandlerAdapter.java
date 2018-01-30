@@ -25,10 +25,7 @@ public class ChatOnlineListHandlerAdapter extends KeepAliveHandlerAdapter<TextWe
     @Override
     public void handlerWebSocketFrameData(ChannelHandlerContext ctx, TextWebSocketFrame webSocketFrame) {
         System.out.println(" ---- ChatHandlerAdapter .....handlerWebSocketFrameData ....");
-
-
         String content = webSocketFrame.text();
-
         System.out.println("ChatHandlerAdapter ....content : " + content );
 
     }
@@ -38,7 +35,6 @@ public class ChatOnlineListHandlerAdapter extends KeepAliveHandlerAdapter<TextWe
     public void handleResponse(Map<String, Object> params) {
         System.out.println(" ---- ChatHandlerAdapter .....handleResponse ....");
 
-
         WebSocketCacheManager webSocketCacheManager = applicationContext.getBean(WebSocketCacheManager.class);
         //聊天通道
         Collection<WebSocketClient> clients = webSocketCacheManager.getClientsByUri("/chat.do");
@@ -46,7 +42,6 @@ public class ChatOnlineListHandlerAdapter extends KeepAliveHandlerAdapter<TextWe
         //推送通道
         Collection<WebSocketClient> subscribeClients = webSocketCacheManager.getClientsByUri(getUri());
         if (clients != null) {
-
             Map<String , Object > onLineList = new HashMap();
             for (WebSocketClient client : clients) {
                 String id = client.getChannelHandlerContext().channel().id().asLongText();
@@ -55,25 +50,15 @@ public class ChatOnlineListHandlerAdapter extends KeepAliveHandlerAdapter<TextWe
             for (WebSocketClient client : subscribeClients) {
                 String id = client.getChannelHandlerContext().channel().id().asLongText();
                 JSONObject message = new JSONObject(onLineList);
-
                 JSONObject newMessage = (JSONObject) message.clone();
                 MessageUtils.sendMessage(client , newMessage.toJSONString());
             }
         }
-
-
-
-
-
-
     }
-
-
 
 
     @Override
     public void onUpgradeCompleted(ChannelHandlerContext ctx, WebSocketClient webSocketClient) {
-
     }
 
 

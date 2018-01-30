@@ -4,9 +4,7 @@ import com.dragsun.websocket.constant.WebSocketConstant;
 import com.sun.javafx.binding.StringFormatter;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.*;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory;
@@ -134,19 +132,23 @@ public class UpgradeResolver {
         if (frameLength == 0) {
             frameLength = 10 * 1024 * 1024;
         }
-        WebSocketServerHandshakerFactory wsFactory = wsFactory = new WebSocketServerHandshakerFactory(
+        WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory(
                 webAddress , protocols , true , frameLength );
 //        if (wsFactory == null) {
 //            wsFactory = new WebSocketServerHandshakerFactory(
 //                    webAddress , uri, true , frameLength );
 //        }
+
+
+
+
         WebSocketServerHandshaker handshaker = wsFactory.newHandshaker(request);
         if (handshaker == null) {
             //版本不兼容
             WebSocketServerHandshakerFactory
                     .sendUnsupportedVersionResponse(ctx.channel());
         } else {
-            handshaker.handshake(ctx.channel(), request);
+            handshaker.handshake(ctx.channel(), request );
         }
         return handshaker;
     }

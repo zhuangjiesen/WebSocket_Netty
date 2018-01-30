@@ -1,11 +1,15 @@
 package com.dragsun.websocket.utils;
 
+import com.alibaba.fastjson.JSONObject;
+import com.dragsun.websocket.adapter.TopicHandlerAdapter;
 import com.dragsun.websocket.annotation.WSProtocol;
 import com.dragsun.websocket.cache.WebSocketClient;
-import com.dragsun.websocket.protocol.WSProtocolHandler;
+import com.dragsun.websocket.server.WSMessage;
+import com.dragsun.websocket.topic.WSTopicHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.websocketx.PingWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import org.springframework.context.ApplicationContext;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -18,32 +22,6 @@ import java.util.regex.Pattern;
  * Created by zhuangjiesen on 2017/9/14.
  */
 public class MessageUtils {
-
-    public static String getProtocol(WSProtocolHandler protocolHandler){
-        WSProtocol protocolAnnotation = protocolHandler.getClass().getAnnotation(WSProtocol.class);
-        if (protocolAnnotation != null) {
-            String protocol = protocolAnnotation.protocol();
-            if (protocol.startsWith("/")) {
-                return protocol.substring(1);
-            }
-            return protocol;
-        }
-        return null;
-    }
-
-
-    public static String getUri(WSProtocolHandler protocolHandler){
-        WSProtocol protocolAnnotation = protocolHandler.getClass().getAnnotation(WSProtocol.class);
-        if (protocolAnnotation != null) {
-            String uri = protocolAnnotation.uri();
-            if (!uri.startsWith("/")) {
-                return "/".concat(uri);
-            }
-            return uri;
-        }
-        return null;
-    }
-
 
 
     public static String getHttpGetUri(String uri){
@@ -102,6 +80,23 @@ public class MessageUtils {
     }
 
 
+
+    public static String swapMessage( WSMessage message){
+        String msg = null;
+        if (message != null) {
+            msg = JSONObject.toJSONString(message);
+        }
+        return msg;
+    }
+
+
+
+    public static void sendMessage(WebSocketClient client , WSMessage message){
+        ChannelHandlerContext channelHandlerContext = client.getChannelHandlerContext();
+        TextWebSocketFrame textFrame = new TextWebSocketFrame(JSONObject.toJSONString(message));
+        channelHandlerContext.writeAndFlush(textFrame);
+    }
+
     public static void sendMessage(WebSocketClient client , String message){
         ChannelHandlerContext channelHandlerContext = client.getChannelHandlerContext();
         TextWebSocketFrame textFrame = new TextWebSocketFrame(message);
@@ -116,5 +111,35 @@ public class MessageUtils {
             channelHandlerContext.writeAndFlush(ping);
         }
     }
+
+
+    public static WSTopicHandler getTopicHandler(String textMsg , Map<String , WSTopicHandler> topicMap) {
+        WSMessage message = parseText(textMsg);
+        if (message != null) {
+            String topic = message.getTopic();
+            if (topic != null) {
+                WSTopicHandler handler = null;
+                return topicMap.get(topic);
+            }
+        }
+        return null;
+    }
+
+
+    public static WSMessage parseText(String textFrame){
+        WSMessage message = null;
+        message = JSONObject.parseObject(textFrame , WSMessage.class);
+        return message;
+    }
+
+
+    public static void sendMessage(String topic , String message) {
+        ApplicationContext applicationContext = ApplicationContextHolder.applicationContext;
+        TopicHandlerAdapter topicHandlerAdapter = applicationContext.getBean(TopicHandlerAdapter.class);
+        topicHandlerAdapter.sendMessage(topic , message);
+    }
+
+
+
 
 }
