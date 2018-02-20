@@ -155,22 +155,36 @@ public class TopicHandlerAdapter extends KeepAliveHandlerAdapter<TextWebSocketFr
         String text = webSocketFrame.text();
         if (text != null && text.length() > 0) {
             WSMessage message = MessageUtils.parseText(text);
-            WSTopicHandler topicHandler = topicsMap.get(message.getTopic());
-            if (topicHandler != null) {
-                //订阅消息
-                if ("subscribe".equals(message.getContentType())) {
+            if (message.getTopic() == null) {
+                if ("ack".equals(message.getContentType())) {
+                    //ack 计算客户端延时
+                    Long messageId = message.getId();
+                    System.out.println();
                     WebSocketCacheManager cacheManager = applicationContext.getBean(WebSocketCacheManager.class);
                     String id = ctx.channel().id().asLongText();
-                    this.subscribeClient(message.getTopic() , cacheManager.getWebSocketClient(id));
+                    WebSocketClient client = cacheManager.getWebSocketClient(id);
+                    client.setMessageId(messageId);
+                    client.newLastAckTime();
+                }
+            } else {
+                WSTopicHandler topicHandler = topicsMap.get(message.getTopic());
+                if (topicHandler != null) {
+                    //订阅消息
+                    if ("subscribe".equals(message.getContentType())) {
+                        WebSocketCacheManager cacheManager = applicationContext.getBean(WebSocketCacheManager.class);
+                        String id = ctx.channel().id().asLongText();
+                        this.subscribeClient(message.getTopic() , cacheManager.getWebSocketClient(id));
 
-                    onSubscribe(message.getTopic() , ctx);
-                } else if ("unsubscribe".equals(message.getContentType())) {
-                    //取消订阅
-                    onUnSubscribe(message.getTopic() , ctx);
-                } else {
-                    topicHandler.onMessageRecieved(ctx , message);
+                        onSubscribe(message.getTopic() , ctx);
+                    } else if ("unsubscribe".equals(message.getContentType())) {
+                        //取消订阅
+                        onUnSubscribe(message.getTopic() , ctx);
+                    }  else {
+                        topicHandler.onMessageRecieved(ctx , message);
+                    }
                 }
             }
+
         }
     }
 

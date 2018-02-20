@@ -12,12 +12,17 @@
 http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.2.xsd            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd"
 >
 
-	<!--
-    <bean id="appWebSocketNettyServer" class="com.java.core.netty.websocket.AppWebSocketNettyServer" init-method="startNettyServer" ></bean>
-    -->
-    <bean id="appWebSocketNettyServer" class="com.java.core.netty.thrift.AppThriftNettyServer" init-method="startNettyServer" ></bean>
+    
+    <bean id="beanHelper" class="com.java.helper.BeanHelper" ></bean>
+    <!--
 
-    
-    
+
+     -->
+
+
+	<import resource="./websocket/spring-netty-websocket.xml"/>
+	<import resource="./websocket/spring-netty-websocket-test.xml"/>
+
+
 </beans>
 	

@@ -5,6 +5,7 @@
 *   topic :
 *   contentType:
 *   content :
+*   id :
 * }
 *
 *
@@ -17,6 +18,9 @@ var WsClient = function (url , protocols ) {
     this.url = url;
     this.topics = null;
     this.socket =  null;
+    this._id = null;
+    /** 是否触发反馈方法 **/
+    this.isTimeoutTag = false;
 
     var _this = this;
 
@@ -30,8 +34,30 @@ var WsClient = function (url , protocols ) {
     this.defaultListener = function (message) {
     };
 
+
+    this.ackMessage = function(){
+        console.log(' 返回确认消息' + this._id);
+        var wsMsg = {};
+        wsMsg.id = this._id;
+        wsMsg.contentType = 'ack';
+        wsMsg.content = null;
+        this.socket.send(JSON.stringify(wsMsg));
+    }
+
+
+
     this.onMessage = function (message) {
         var wsmessage = JSON.parse(message.data);
+        this._id = wsmessage.id;
+        _this = this;
+        if (!this.isTimeoutTag) {
+            this.isTimeoutTag = true;
+            setTimeout(function () {
+                _this.isTimeoutTag = false;
+                _this.ackMessage();
+            } , 3000);
+        }
+
         var mtopic = wsmessage.topic;
         var handler = getTopicHandler(mtopic);
         if (handler) {

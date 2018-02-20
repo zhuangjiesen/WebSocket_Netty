@@ -84,6 +84,7 @@ public class MessageUtils {
     public static String swapMessage( WSMessage message){
         String msg = null;
         if (message != null) {
+            message.newId();
             msg = JSONObject.toJSONString(message);
         }
         return msg;

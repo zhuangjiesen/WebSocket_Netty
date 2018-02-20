@@ -26,6 +26,10 @@ public class WebSocketClient {
     private Set<String> topics;
     private Map<String ,Object> reqParam;
 
+    private Long messageId;
+    private Long lastAckTime;
+
+
 
     public Map<String, Object> getReqParam() {
         return reqParam;
@@ -100,4 +104,26 @@ public class WebSocketClient {
     public void setTopics(Set<String> topics) {
         this.topics = topics;
     }
+
+
+    public Long getMessageId() {
+        return messageId;
+    }
+
+    public void setMessageId(Long messageId) {
+        this.messageId = messageId;
+    }
+
+    public Long getLastAckTime() {
+        return lastAckTime;
+    }
+
+    public void setLastAckTime(Long lastAckTime) {
+        this.lastAckTime = lastAckTime;
+    }
+
+    public void newLastAckTime() {
+        this.lastAckTime = System.currentTimeMillis();
+    }
+
 }

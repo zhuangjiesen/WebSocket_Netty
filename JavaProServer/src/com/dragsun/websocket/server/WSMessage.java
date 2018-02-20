@@ -1,17 +1,21 @@
 package com.dragsun.websocket.server;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Created by zhuangjiesen on 2018/1/25.
  */
 public class WSMessage {
 
+    private static AtomicLong _id = new AtomicLong(0);
     private Map<String , String> header;
     private String topic ;
     private String contentType;
     private String content;
     private String tag;
+
+    private Long id;
 
 
     public Map<String, String> getHeader() {
@@ -53,5 +57,18 @@ public class WSMessage {
 
     public void setTag(String tag) {
         this.tag = tag;
+    }
+
+    public void newId(){
+        id = _id.incrementAndGet();
+    }
+
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }
