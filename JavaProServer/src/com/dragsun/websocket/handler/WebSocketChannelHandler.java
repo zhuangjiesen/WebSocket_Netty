@@ -39,9 +39,6 @@ public class WebSocketChannelHandler  extends ChannelInboundHandlerAdapter {
             if (uri.startsWith("//")) {
                 request.setUri(uri.substring(1));
             }
-
-
-
             WebSocketClient webSocketClient = new WebSocketClient();
             String id = getChannelCtxId(ctx);
             //先注册请求处理器
@@ -53,6 +50,13 @@ public class WebSocketChannelHandler  extends ChannelInboundHandlerAdapter {
                 upgradeResolver.handleRequestError(ctx, request , e);
                 return ;
             }
+
+            //执行websocket前拦截，作参数的处理
+            if (webSocketClient.getHandlerAdapter().beforeUpgrade(ctx , request)) {
+                //返回true 说明请求不符合 请求自己处理
+                return;
+            }
+
             WebSocketServerHandshaker handshaker = null;
             // upgrade 与 websocket 握手过程
             if ((handshaker = upgradeResolver.handleRequest(ctx, request )) != null) {

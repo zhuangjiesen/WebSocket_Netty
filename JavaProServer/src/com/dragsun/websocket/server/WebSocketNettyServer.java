@@ -1,5 +1,8 @@
 package com.dragsun.websocket.server;
 
+import com.dragsun.websocket.cache.WebSocketCacheManager;
+import com.dragsun.websocket.mapping.WSRequestHandlerMapping;
+import com.dragsun.websocket.resolver.UpgradeResolver;
 import com.dragsun.websocket.utils.LogUtils;
 import com.dragsun.websocket.handler.WebSocketChannelHandlerFactory;
 import io.netty.bootstrap.ServerBootstrap;
@@ -10,6 +13,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.stream.ChunkedWriteHandler;
+import org.springframework.beans.factory.InitializingBean;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -20,7 +24,7 @@ import java.util.concurrent.Executors;
  *
  * Created by zhuangjiesen on 2017/8/8.
  */
-public class WebSocketNettyServer {
+public class WebSocketNettyServer implements InitializingBean {
 
     /** 端口号 **/
     private int port;
@@ -99,5 +103,17 @@ public class WebSocketNettyServer {
 
     public void setWebSocketChannelHandlerFactory(WebSocketChannelHandlerFactory webSocketChannelHandlerFactory) {
         this.webSocketChannelHandlerFactory = webSocketChannelHandlerFactory;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        //创建默认的请求处理器
+        if (webSocketChannelHandlerFactory == null) {
+             WebSocketChannelHandlerFactory factory = new WebSocketChannelHandlerFactory();
+             factory.setRequestHandlerMapping(new WSRequestHandlerMapping());
+             factory.setUpgradeResolver(new UpgradeResolver());
+             factory.setWebSocketCacheManager(new WebSocketCacheManager());
+             webSocketChannelHandlerFactory = factory;
+         }
     }
 }

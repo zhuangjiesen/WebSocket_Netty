@@ -3,6 +3,7 @@ package com.dragsun.websocket.adapter;
 import com.dragsun.websocket.cache.WebSocketClient;
 import com.dragsun.websocket.resolver.DataFrameResolver;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.http.FullHttpRequest;
 
 import java.util.Map;
 
@@ -23,6 +24,12 @@ public interface WSHandlerAdapter {
     public void handleResponse(Map<String , Object> params);
 
 
+
+    /*
+    * 返回false 默认通过
+    *
+    * */
+    public boolean beforeUpgrade(ChannelHandlerContext ctx , FullHttpRequest httpRequest);
 
     /*
     * 连接完成时调用

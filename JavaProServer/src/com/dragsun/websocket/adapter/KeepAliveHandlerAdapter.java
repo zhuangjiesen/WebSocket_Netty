@@ -6,6 +6,7 @@ import com.dragsun.websocket.cache.WebSocketClient;
 import com.dragsun.websocket.utils.MessageUtils;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import org.springframework.beans.BeansException;
@@ -51,12 +52,15 @@ public abstract class KeepAliveHandlerAdapter<T extends WebSocketFrame> extends 
     private static volatile int MAX_RE_PING = 5;
 
 
-
+    @Override
+    public boolean beforeUpgrade(ChannelHandlerContext ctx, FullHttpRequest httpRequest) {
+        return false;
+    }
 
     /*
-    * 给所有客户端发送ping 消息
-    *
-    * */
+        * 给所有客户端发送ping 消息
+        *
+        * */
     public static void sendPingMessageToAll(){
         WebSocketCacheManager webSocketCacheManager = mApplicationContext.getBean(WebSocketCacheManager.class);
         Collection<WebSocketClient> clients = webSocketCacheManager.getAllClients();

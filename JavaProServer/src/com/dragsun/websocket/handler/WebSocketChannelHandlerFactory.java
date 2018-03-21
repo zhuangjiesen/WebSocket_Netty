@@ -4,6 +4,7 @@ package com.dragsun.websocket.handler;
 import com.dragsun.websocket.cache.WebSocketCacheManager;
 import com.dragsun.websocket.mapping.WSRequestHandlerMapping;
 import com.dragsun.websocket.resolver.UpgradeResolver;
+import org.springframework.beans.factory.InitializingBean;
 
 /**
 *
@@ -63,4 +64,7 @@ public class WebSocketChannelHandlerFactory  {
     public void setWebSocketCacheManager(WebSocketCacheManager webSocketCacheManager) {
         this.webSocketCacheManager = webSocketCacheManager;
     }
+
+
+
 }

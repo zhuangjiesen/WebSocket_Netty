@@ -21,6 +21,8 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	</bean>
 	<bean id="chatOnlineListTopicHandler" class="com.java.core.netty.websocket.common.topics.ChatOnlineListTopicHandler"  >
 	</bean>
+	<bean id="meetingTopicHandler" class="com.java.core.netty.websocket.common.topics.MeetingTopicHandler"  >
+	</bean>
 
 
 	<bean id="indexTopicHandler" class="com.java.core.netty.websocket.common.topics.IndexTopicHandler"  >

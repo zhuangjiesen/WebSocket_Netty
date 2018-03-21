@@ -7,6 +7,9 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by zhuangjiesen on 2017/8/15.
  */
-public class WebSocketTestService implements InitializingBean , ApplicationContextAware{
+public class WebSocketTestService implements InitializingBean  , ApplicationListener , ApplicationContextAware{
 
     private static ApplicationContext applicationContext;
 
@@ -37,9 +40,10 @@ public class WebSocketTestService implements InitializingBean , ApplicationConte
                 System.out.println("WebSocketTestService .....定时发送消息....");
 
                 try {
+
                     {
-                        String frameMessage = "我是 index 默认业务推送的数据" + System.currentTimeMillis();
-                        MessageUtils.sendMessage("index" , frameMessage );
+                        String frameMessage = "我是 meeting 聊天室推送的数据" + System.currentTimeMillis();
+                        MessageUtils.sendMessage("meeting" , frameMessage );
                     }
 
                     {
@@ -101,5 +105,14 @@ public class WebSocketTestService implements InitializingBean , ApplicationConte
     }
 
 
+//    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
 
+        System.out.println("xxxxxxxxxxxxxxxx---------------------------");
+    }
+
+    @Override
+    public void onApplicationEvent(ApplicationEvent event) {
+        System.out.println();
+    }
 }

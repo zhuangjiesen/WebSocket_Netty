@@ -41,6 +41,9 @@ public class FrameHandlerAdapter extends KeepAliveHandlerAdapter<TextWebSocketFr
     }
 
 
+
+
+
     @Override
     public void handlerWebSocketFrameData(ChannelHandlerContext ctx, TextWebSocketFrame webSocketFrame) {
         System.out.println(" ---- FrameHandlerAdapter .....handlerWebSocketFrameData ....");

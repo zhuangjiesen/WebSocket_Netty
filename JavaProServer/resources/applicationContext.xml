@@ -17,9 +17,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
     <!--
 
 
-     -->
-
-
+    -->
 	<import resource="./websocket/spring-netty-websocket.xml"/>
 	<import resource="./websocket/spring-netty-websocket-test.xml"/>
 

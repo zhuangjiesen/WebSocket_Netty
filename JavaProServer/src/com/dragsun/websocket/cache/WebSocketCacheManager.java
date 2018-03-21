@@ -10,7 +10,7 @@ import java.util.Set;
 public class WebSocketCacheManager {
 
 
-    private WebSocketClientDao webSocketClientDao;
+    private WebSocketClientDao webSocketClientDao = new WebSocketClientDao();
 
 
     public void putWebSocketClient(String id , WebSocketClient webSocketClient){

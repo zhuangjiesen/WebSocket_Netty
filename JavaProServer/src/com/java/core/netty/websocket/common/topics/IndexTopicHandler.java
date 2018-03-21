@@ -5,6 +5,7 @@ import com.dragsun.websocket.cache.WebSocketClient;
 import com.dragsun.websocket.server.WSMessage;
 import com.dragsun.websocket.topic.AbstractTopicHandler;
 import com.dragsun.websocket.topic.WSTopicHandler;
+import com.dragsun.websocket.utils.MessageUtils;
 import io.netty.channel.ChannelHandlerContext;
 
 /**
@@ -18,6 +19,8 @@ public class IndexTopicHandler extends AbstractTopicHandler {
     @Override
     public void onMessageRecieved(ChannelHandlerContext ctx, WSMessage message) {
         System.out.println(" index onMessageRecieved : " + message.getContent());
+
+        MessageUtils.sendMessage(message.getTopic() , message.getContent());
     }
 
     @Override
