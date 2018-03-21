@@ -18,31 +18,8 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	</bean>
 
 
-	<bean id="upgradeResolver" class="com.dragsun.websocket.resolver.UpgradeResolver"  >
-	</bean>
-	<!-- 存储管理器 -->
-	<bean id="webSocketClientDao" class="com.dragsun.websocket.cache.WebSocketClientDao"  >
-	</bean>
-	<bean id="webSocketCacheManager" class="com.dragsun.websocket.cache.WebSocketCacheManager"  >
-		<property name="webSocketClientDao" ref="webSocketClientDao" />
-	</bean>
-
-	<!-- 请求映射处理器 -->
-	<bean id="requestHandlerMapping" class="com.dragsun.websocket.mapping.WSRequestHandlerMapping"  >
-	</bean>
-
-
-	<!-- 请求处理工厂类 -->
-	<bean id="webSocketChannelHandlerFactory" class="com.dragsun.websocket.handler.WebSocketChannelHandlerFactory"  >
-		<property name="webSocketCacheManager" ref="webSocketCacheManager"/>
-		<property name="upgradeResolver" ref="upgradeResolver"/>
-		<property name="requestHandlerMapping" ref="requestHandlerMapping"/>
-	</bean>
-
-
-	<bean id="webSocketNettyServer" class="com.dragsun.websocket.server.WebSocketNettyServer" init-method="startNettyServer" >
+	<bean id="webSocketNettyServer" class="com.dragsun.websocket.server.WebSocketNettyServer"  >
 		<property name="port" value="38888" />
-		<property name="webSocketChannelHandlerFactory"  ref="webSocketChannelHandlerFactory" />
 	</bean>
 
 

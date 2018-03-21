@@ -27,11 +27,11 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Created by zhuangjiesen on 2017/9/13.
  */
-public class WSRequestHandlerMapping implements  ApplicationContextAware , ApplicationListener<ContextRefreshedEvent> ,BeanDefinitionRegistryPostProcessor {
+public class WSRequestHandlerMapping implements  ApplicationContextAware , ApplicationListener<ContextRefreshedEvent> , BeanDefinitionRegistryPostProcessor {
 
-    private static ApplicationContext applicationContext;
-    private static BeanDefinitionRegistry beanRegistry;
-    private static ConfigurableListableBeanFactory beanFactory;
+    private ApplicationContext applicationContext;
+    private BeanDefinitionRegistry beanRegistry;
+    private ConfigurableListableBeanFactory beanFactory;
 
     private static ConcurrentHashMap<String , WSHandlerAdapter> uriAndHandlerAdapterMap = new ConcurrentHashMap<>();
 
@@ -160,20 +160,19 @@ public class WSRequestHandlerMapping implements  ApplicationContextAware , Appli
 
     @Override
     public void setApplicationContext(ApplicationContext context) throws BeansException {
-        applicationContext = context;
+        this.applicationContext = context;
     }
 
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
-        this.beanRegistry = registry;
+        if (this.beanRegistry == null) {
+            this.beanRegistry = registry;
+        }
     }
 
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory mBeanFactory) throws BeansException {
         this.beanFactory = mBeanFactory;
-
-
-
     }
 
     @Override
@@ -181,6 +180,10 @@ public class WSRequestHandlerMapping implements  ApplicationContextAware , Appli
         if (event.getApplicationContext().getParent() == null) {
             init();
         }
+    }
+
+    public void setBeanDefinitionRegistry(BeanDefinitionRegistry registry) {
+        this.beanRegistry = registry;
     }
 
 }

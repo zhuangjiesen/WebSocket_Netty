@@ -13,7 +13,17 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.stream.ChunkedWriteHandler;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
+import org.springframework.beans.factory.support.GenericBeanDefinition;
+import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.event.SimpleApplicationEventMulticaster;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -24,12 +34,15 @@ import java.util.concurrent.Executors;
  *
  * Created by zhuangjiesen on 2017/8/8.
  */
-public class WebSocketNettyServer implements InitializingBean {
+public class WebSocketNettyServer implements InitializingBean , ApplicationContextAware , BeanDefinitionRegistryPostProcessor{
 
     /** 端口号 **/
     private int port;
     private WebSocketChannelHandlerFactory webSocketChannelHandlerFactory;
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+    private BeanDefinitionRegistry beanDefinitionRegistry;
+    private ApplicationContext applicationContext ;
 
     public WebSocketNettyServer() {
         super();
@@ -107,13 +120,58 @@ public class WebSocketNettyServer implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
+
+    }
+
+
+    @Override
+    public void setApplicationContext(ApplicationContext context) throws BeansException {
+        this.applicationContext = context;
+    }
+
+    @Override
+    public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
+        this.beanDefinitionRegistry = registry;
+
+
         //创建默认的请求处理器
         if (webSocketChannelHandlerFactory == null) {
-             WebSocketChannelHandlerFactory factory = new WebSocketChannelHandlerFactory();
-             factory.setRequestHandlerMapping(new WSRequestHandlerMapping());
-             factory.setUpgradeResolver(new UpgradeResolver());
-             factory.setWebSocketCacheManager(new WebSocketCacheManager());
-             webSocketChannelHandlerFactory = factory;
-         }
+            WebSocketChannelHandlerFactory factory = new WebSocketChannelHandlerFactory();
+
+            //请求映射处理器
+            GenericBeanDefinition requestHandlerMappingBean = new GenericBeanDefinition();
+            requestHandlerMappingBean.setBeanClass(WSRequestHandlerMapping.class);
+            this.beanDefinitionRegistry.registerBeanDefinition("requestHandlerMapping" , requestHandlerMappingBean );
+
+
+            //升级请求握手处理器
+            GenericBeanDefinition upgradeResolverBean = new GenericBeanDefinition();
+            upgradeResolverBean.setBeanClass(UpgradeResolver.class);
+            this.beanDefinitionRegistry.registerBeanDefinition("upgradeResolver" , upgradeResolverBean );
+
+            // 存储客户端服务
+            GenericBeanDefinition webSocketCacheManagerBean = new GenericBeanDefinition();
+            webSocketCacheManagerBean.setBeanClass(WebSocketCacheManager.class);
+            this.beanDefinitionRegistry.registerBeanDefinition("webSocketCacheManager" , webSocketCacheManagerBean );
+
+            WSRequestHandlerMapping handlerMapping = this.applicationContext.getBean( WSRequestHandlerMapping.class);
+            handlerMapping.setBeanDefinitionRegistry(this.beanDefinitionRegistry);
+
+            UpgradeResolver upgradeResolver = this.applicationContext.getBean(UpgradeResolver.class);
+            WebSocketCacheManager webSocketCacheManager = this.applicationContext.getBean(WebSocketCacheManager.class);
+
+            factory.setRequestHandlerMapping(handlerMapping);
+            factory.setUpgradeResolver(upgradeResolver);
+            factory.setWebSocketCacheManager(webSocketCacheManager);
+            webSocketChannelHandlerFactory = factory;
+        }
+
+        //启动服务
+        startNettyServer();
+    }
+
+    @Override
+    public void postProcessBeanFactory(ConfigurableListableBeanFactory configurableListableBeanFactory) throws BeansException {
+
     }
 }

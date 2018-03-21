@@ -42,8 +42,8 @@ public class WebSocketTestService implements InitializingBean  , ApplicationList
                 try {
 
                     {
-                        String frameMessage = "我是 meeting 聊天室推送的数据" + System.currentTimeMillis();
-                        MessageUtils.sendMessage("meeting" , frameMessage );
+                        String frameMessage = "我是 index 聊天室推送的数据" + System.currentTimeMillis();
+                        MessageUtils.sendMessage("index" , frameMessage );
                     }
 
                     {

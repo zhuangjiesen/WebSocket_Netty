@@ -26,6 +26,5 @@ public class IndexTopicHandler extends AbstractTopicHandler {
     @Override
     public void onTopicRegistyCompleted(ChannelHandlerContext ctx, WebSocketClient webSocketClient) {
         System.out.println(" index onTopicRegistyCompleted : -------------" );
-
     }
 }
