@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: org.eclipse.jetty.orbit:javax.security.auth.message:1.0.0.v201108011116">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/eclipse/jetty/orbit/javax.security.auth.message/1.0.0.v201108011116/javax.security.auth.message-1.0.0.v201108011116.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/eclipse/jetty/orbit/javax.security.auth.message/1.0.0.v201108011116/javax.security.auth.message-1.0.0.v201108011116-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/eclipse/jetty/orbit/javax.security.auth.message/1.0.0.v201108011116/javax.security.auth.message-1.0.0.v201108011116-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

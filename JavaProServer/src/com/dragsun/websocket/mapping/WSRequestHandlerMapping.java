@@ -51,6 +51,7 @@ public class WSRequestHandlerMapping implements  ApplicationContextAware , Appli
 
     public void init() {
         if (!isInit) {
+            ///double check
             synchronized (this) {
                 if (!isInit) {
                     /*
