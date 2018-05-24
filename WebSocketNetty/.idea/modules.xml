@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/WebSocketNetty.iml" filepath="$PROJECT_DIR$/WebSocketNetty.iml" />
+      <module fileurl="file://$PROJECT_DIR$/bing-speech/bing-speech.iml" filepath="$PROJECT_DIR$/bing-speech/bing-speech.iml" />
+      <module fileurl="file://$PROJECT_DIR$/dragsun-main/dragsun-main.iml" filepath="$PROJECT_DIR$/dragsun-main/dragsun-main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/websocket-server/websocket-server.iml" filepath="$PROJECT_DIR$/websocket-server/websocket-server.iml" />
+    </modules>
+  </component>
+</project>

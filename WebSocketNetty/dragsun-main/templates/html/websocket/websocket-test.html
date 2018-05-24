@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>websocket实例</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<h1>websocket实例 推送模块展示平台</h1>
+<h3>展示单请求 多订阅业务的实现</h3>
+<h5>业务场景： 有时候一个页面需要多个推送业务(人员信息变更，统计信息变更，业务状态变更等)，但是多个请求维护明显不符合要求</h5>
+<h5>实现： 勾选想要的主题。后端只推送选中的主题相应的推送消息</h5>
+<div style="position: relative; left : 50px;" >
+    可选订阅主题:
+    <ul>
+        <li>
+            <div class="targetName">默认订阅</div>
+            <h3>URI : </h3>
+            <div class="targetUri">/</div>
+            <div>
+                <h3>参数 : </h3>
+                <input type="text" name="params" id="params" >
+            </div>
+            <h3>订阅主题 topic : </h3>
+            <div>
+                <div>
+                    <label for="indexTopic"  >index</label>
+                    <input type="checkbox" id="indexTopic" name="topic" value="index" >
+
+                    <br>
+                    <div>
+                        <input type="text" id="indexTopicContent" value="我是 index 的 message " >
+                        <button data-topic="index" data-id="indexTopicContent"  onclick="sendTopicContent(this);">发送</button>
+                    </div>
+                </div>
+                <div style="margin-top: 20px;">
+                    <label for="locationTopic" >location</label>
+                    <input id="locationTopic" type="checkbox" name="topic" value="location" >
+
+                    <br>
+                    <div>
+                        <input type="text" id="locationTopicContent" value="我是 location 的 message " >
+                        <button data-topic="location" data-id="locationTopicContent"  onclick="sendTopicContent(this);">发送</button>
+                    </div>
+                </div>
+                <div style="margin-top: 20px;" >
+                    <label for="newsTopic" >news</label>
+                    <input id="newsTopic" type="checkbox" name="topic" value="news" >
+
+                    <br>
+                    <div>
+                        <input type="text" id="newsTopicContent" value="我是 news 的 message " >
+                        <button data-topic="news" data-id="newsTopicContent"  onclick="sendTopicContent(this);">发送</button>
+                    </div>
+                </div>
+                <div style="margin-top: 20px;" >
+                    <label for="stockInfoTopic"  >stockInfo</label>
+                    <input id="stockInfoTopic" type="checkbox" name="topic" value="stockInfo" >
+                    <br>
+                    <div>
+                        <input type="text" id="stockInfoopicContent" value="我是 stockInfo 的 message " >
+                        <button data-topic="stockInfo" data-id="stockInfoopicContent"  onclick="sendTopicContent(this);">发送</button>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <button onclick="onSubUri(this);">订阅</button>
+        </li>
+    </ul>
+</div>
+
+<div style="position: relative; left : 100px;"  >
+    <div>订阅结果</div>
+    <div id="subscribeList">
+
+
+    </div>
+
+</div>
+
+
+
+
+</body>
+<script src="../../js/jquery.min.js" ></script>
+<script type="text/javascript" src="../../js/ws-util.js"></script>
+<script type="text/javascript" >
+    var wsClient = null;
+
+    function sendTopicContent(item) {
+        var dataid = $(item).attr('data-id');
+        var topic = $(item).attr('data-topic');
+        var value = $('#' + dataid).val();
+        wsClient.sendByTopic(topic , value);
+    }
+
+
+    $(document).ready(function () {
+    });
+
+    function onSubUri(item){
+        var topics = [] ;
+        $("input[name='topic']:checkbox:checked").each(function(){
+            topics.push($(this).val()) ;
+        })
+
+
+        var url = 'ws://127.0.0.1:38888/index.js?name=jasss&content=222';
+        wsClient = new WsClient( url , null );
+        var option = {};
+        //获取连接
+        wsClient.connect(option , function (client) {
+            //订阅
+            for( var i = 0 ; i < topics.length ; i ++) {
+                client.subscribe( topics[i], function (greeting) {
+                    console.log('greeting : ' + greeting)
+                    $('#subscribeList').append('<li>' + greeting + '</li>')
+                });
+            }
+        });
+
+
+
+
+    }
+
+
+</script>
+</html>

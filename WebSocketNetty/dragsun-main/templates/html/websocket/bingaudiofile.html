@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>必应语音识别-文件上传</title>
+    <script src="../../js/jquery.min.js" ></script>
+    <script src="../../js/jquery.form.js" ></script>
+    <style>
+        h3{
+            margin-top: 0px;
+        }
+        .inline-class {
+            display:inline;
+        }
+        .left {
+            float: left;
+            width: 500px;
+            height: 300px;
+        }
+        .right {
+            margin-left: 510px;
+            height: 300px;
+            width: 500px;
+        }
+    </style>
+</head>
+<body style="padding-left: 30px;">
+<h1>必应语音识别-文件上传</h1>
+<pre id="log"></pre>
+<form id="mainForm" >
+    <label for="audiofile" >音频文件上传</label>
+    <input name="audiofile" type="file" id="audiofile" >
+</form>
+<h4 id="statusText"></h4>
+<button id="agreementSub">提交</button>
+
+<div style="margin-top: 30px;">
+    <div class="left" >
+        <h3>未处理结果：</h3>
+        <ul id="plainList" >
+        </ul>
+
+    </div>
+    <div  class="right" >
+        <h3>断句后结果：</h3>
+        <ul id="sentenceInfoList" >
+        </ul>
+    </div>
+
+</div>
+
+<script>
+    $("#agreementSub").on("click",function(){
+        $('#mainForm').ajaxSubmit(      //ajax方式提交表单
+                {
+                    url: 'http://10.242.26.164:11111/testuploadimg',
+                    type: 'post',
+                    dataType: 'json',
+                    beforeSubmit: function () {
+                        $('#statusText').text('已经提交请等待结果....');
+                        $("#agreementSub").hide();
+                    },
+                    success: function (data) {
+                        var succ = data.success;
+                        if (succ) {
+                            var phraseList = data.phraseList;
+                            $('#plainList').html('');
+                            for (var i = 0 ; i < phraseList.length ; i++) {
+                                var item = phraseList[i];
+                                $('#plainList').append('<li>' + item + '</li>');
+                            }
+                            var sentenceInfoList = data.sentenceInfoList;
+                            $('#sentenceInfoList').html('');
+                            for (var i = 0 ; i < sentenceInfoList.length ; i++) {
+                                var item = sentenceInfoList[i];
+                                $('#sentenceInfoList').append('<li>' + item + '</li>');
+                            }
+                            $('#statusText').text('成功....');
+                        } else {
+                            alert(data.message);
+                        }
+
+                        $("#agreementSub").show();
+                    },
+                    clearForm: false,//禁止清楚表单
+                    resetForm: false //禁止重置表单
+                });
+    });
+
+</script>
+</body>
+</html>

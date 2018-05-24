@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: com.google.cloud:google-cloud-speech:0.46.0-alpha">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/google/cloud/google-cloud-speech/0.46.0-alpha/google-cloud-speech-0.46.0-alpha.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/google/cloud/google-cloud-speech/0.46.0-alpha/google-cloud-speech-0.46.0-alpha-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/google/cloud/google-cloud-speech/0.46.0-alpha/google-cloud-speech-0.46.0-alpha-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

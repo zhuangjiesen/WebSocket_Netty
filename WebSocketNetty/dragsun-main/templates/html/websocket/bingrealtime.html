@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>必应语音识别-实时语音</title>
+    <script src="../../js/jquery.min.js" ></script>
+    <style>
+        h3{
+            margin-top: 0px;
+        }
+        .inline-class {
+            display:inline;
+        }
+        .left {
+            float: left;
+            width: 500px;
+            height: 300px;
+        }
+        .right {
+            margin-left: 510px;
+            height: 300px;
+            width: 500px;
+        }
+    </style>
+</head>
+<body style="padding-left: 30px;">
+<h1>必应语音识别</h1>
+<button onclick="beginRocord()">录入语音</button>
+<br>
+<div>
+    <h3>蹦字：</h3>
+    <ul id="fragmentText">
+    </ul>
+</div>
+<br>
+<div>
+    <div class="left" >
+        <h3>未处理结果：</h3>
+        <ul  id="phraseText" >
+        </ul>
+
+    </div>
+    <div  class="right" >
+        <h3>断句后结果：</h3>
+        <ul id="sentenceInfoList" >
+        </ul>
+    </div>
+
+</div>
+<br>
+<button onclick="stopRocord()">停止语音</button>
+<h3>消息日志：</h3>
+<pre id="log"></pre>
+
+<script>
+    var ws;
+    var audioCtx;
+    function beginRocord() {
+        readyWs();
+        getUserMedia();
+    }
+    function stopRocord() {
+        audioCtx.close();
+        ws.close();
+    }
+
+    function beginSpeeching() {
+        ws.send('start');
+    }
+    function stopSpeeching() {
+        ws.send('stop');
+//        ws.close();
+        audioCtx.close();
+
+    }
+    function readyWs() {
+        ws = new WebSocket('ws://localhost:38888/');
+        ws.onopen = function() {
+            log('CONNECT');
+        };
+        ws.onclose = function() {
+            log('DISCONNECT');
+        };
+        ws.onmessage = function(event) {
+            log('MESSAGE: ' + event.data);
+            var message = event.data;
+            var obj = JSON.parse(message);
+            //type = 1 fragment
+            if (obj.type == 1) {
+                $('#fragmentText').html('<li>' + obj.content + '</li>');
+            } else if (obj.type == 2) {
+                $('#sentenceInfoList').append('<li>' + obj.content + '</li>');
+            } else if (obj.type == 0) {
+                $('#phraseText').append('<li>' + obj.content + '</li>');
+            } else {
+//                alert(obj.content);
+            }
+
+        };
+        function log(msg) {
+            console.log(msg)
+            document.getElementById('log').textContent += msg + '\n';
+        }
+    }
+    function getUserMedia() {
+        var context = null;
+        if (navigator.getUserMedia) {
+            navigator.getUserMedia({audio: true, video: false}, onSuccessSoHard, onFailSoHard);
+        } else if (navigator.webkitGetUserMedia) {
+            navigator.webkitGetUserMedia('audio', onSuccessSoHard, onFailSoHard);
+        }
+        function onSuccessSoHard(stream) {
+            var audioContext = window.AudioContext || window.webkitAudioContext;
+            context = new audioContext();
+            audioCtx = context;
+            var audioInput = context.createMediaStreamSource(stream);
+            var bufferSize = 2048 ;
+            // create a javascript node
+            var recorder = context.createScriptProcessor(bufferSize, 1, 1);
+            // specify the processing function
+            recorder.onaudioprocess = recorderProcess;
+            // connect stream to our recorder
+            audioInput.connect(recorder);
+            // connect our recorder to the previous destination
+            recorder.connect(context.destination);
+        }
+        function onFailSoHard(e) {
+            console.log('Reeeejected!', e);
+        }
+        function recorderProcess(e) {
+            var left = e.inputBuffer.getChannelData(0);
+            var downEncored = DownSampleAudioFrame(left, context.sampleRate, 16000);
+            var msg = convertFloat32ToInt16(downEncored);
+            ws && ws.send(msg)
+        }
+        function convertFloat32ToInt16(buffer) {
+            l = buffer.length;
+            buf = new Int16Array(l);
+            while (l--) {
+                buf[l] = Math.min(1, buffer[l])*0x7FFF;
+            }
+            return buf.buffer;
+        }
+
+
+        function DownSampleAudioFrame (srcFrame, srcRate, dstRate) {
+            if (dstRate === srcRate || dstRate > srcRate) {
+                return srcFrame
+            }
+
+            const ratio = srcRate / dstRate
+            const dstLength = Math.round(srcFrame.length / ratio)
+            const dstFrame = new Float32Array(dstLength)
+            let srcOffset = 0
+            let dstOffset = 0
+            while (dstOffset < dstLength) {
+                const nextSrcOffset = Math.round((dstOffset + 1) * ratio)
+                let accum = 0
+                let count = 0
+                while (srcOffset < nextSrcOffset && srcOffset < srcFrame.length) {
+                    accum += srcFrame[srcOffset++]
+                    count++
+                }
+                dstFrame[dstOffset++] = accum / count
+            }
+
+            return dstFrame
+        }
+
+
+    }
+</script>
+</body>
+</html>
