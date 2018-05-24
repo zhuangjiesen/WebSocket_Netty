@@ -1,8 +1,8 @@
 package com.jason.controller;
 
 
-import com.netease.ai.bing.*;
-import com.netease.ai.bing.util.WordUtil;
+import com.jason.bing.*;
+import com.jason.bing.util.WordUtil;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
