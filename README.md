@@ -12,7 +12,8 @@
 ```
 
 ### 结构
-    ```
+
+```
     基于spring 容器
     - 项目新增springboot 的启动，用于一些web操作
     - 有直接通过App.java 启动程序    
@@ -23,7 +24,7 @@
             templates: 静态页面和资源文件夹以及测试网页
         websocket-server websocket实现模块
         以及其他模块(bing 微软必应SpeechToText的接入)
-    ``` 
+```
 
 # WebSocket Netty实现
 
@@ -46,6 +47,7 @@ websocket浏览器h5对象，前端api文档 ： https://www.w3.org/TR/websocket
 
 #### 程序入口在 dragsun-main 模块下
 #### 在 dragsun-main 模块中的 resources/websocket.xml 的spring 配置文件中配置
+
 ```
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
@@ -78,9 +80,8 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 
 
 </beans>
-
-
 ```
+
 
 
 
