@@ -1,8 +1,8 @@
 package com.jason.bing.util;
 
 import com.alibaba.fastjson.JSONObject;
-import com.jason.bing.SpeechEventConstant;
 import com.jason.bing.RecognizeResponse;
+import com.jason.bing.SpeechEventConstant;
 
 import java.util.UUID;
 
@@ -91,9 +91,11 @@ public class MessageUtil {
 
 
 
+
     public static byte[] getAudioMessage(byte[] header , byte[] content) {
         byte[] headerLen = getBinaryHeaderLen((short) header.length);
         byte[] data = new byte[2 + header.length + content.length];
+        //头2个字节需要把消息头的长度放进去
         data[0] = headerLen[0];
         data[1] = headerLen[1];
         int pos = 2;

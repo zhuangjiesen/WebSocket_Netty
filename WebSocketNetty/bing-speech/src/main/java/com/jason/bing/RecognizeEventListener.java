@@ -8,6 +8,6 @@ package com.jason.bing;
  */
 public interface RecognizeEventListener {
 
-    public void onRecognizeEventTriggered(RecognizeWebSocket recognizeWebSocket, RecognizeResponse response);
+    public void onRecognizeEventTriggered(Object recognizationClient, RecognizeResponse response);
 
 }

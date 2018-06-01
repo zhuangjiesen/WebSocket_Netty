@@ -3,7 +3,7 @@ package com.jason.bing;
 /**
  * @param
  * @Author: zhuangjiesen
- * @Description:
+ * @Description: 一个单词，从bing 返回值中抽象出来的
  * @Date: Created in 2018/5/22
  */
 public class WordInfo {
@@ -11,10 +11,10 @@ public class WordInfo {
     private String text;
     private String startTime;
     // 单位 ： 100纳秒
-    private int startTimeNum;
+    private long startTimeNum;
     private String endTime;
     // 单位 ： 100纳秒
-    private int endTimeNum;
+    private long endTimeNum;
     private Integer duration;
 
 
@@ -51,22 +51,21 @@ public class WordInfo {
     }
 
 
-    public int getStartTimeNum() {
+    public long getStartTimeNum() {
         return startTimeNum;
     }
 
-    public void setStartTimeNum(int startTimeNum) {
+    public void setStartTimeNum(long startTimeNum) {
         this.startTimeNum = startTimeNum;
     }
 
-    public int getEndTimeNum() {
+    public long getEndTimeNum() {
         return endTimeNum;
     }
 
-    public void setEndTimeNum(int endTimeNum) {
+    public void setEndTimeNum(long endTimeNum) {
         this.endTimeNum = endTimeNum;
     }
-
 
     @Override
     public String toString() {

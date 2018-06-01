@@ -9,25 +9,25 @@ package com.jason.bing.util;
 public class DateUtil {
 
 
-    // a integer to xx:xx:xx
-    public static String secToTime(long time) {
+    // a integer to xx:xx:xx 参数 单位秒
+    public static String secToTime(long secTime) {
         String timeStr = null;
         int hour = 0;
         int minute = 0;
         int second = 0;
-        if (time <= 0)
+        if (secTime <= 0)
             return "00:00:00";
         else {
-            minute = (int) (time / 60);
+            minute = (int) (secTime / 60);
             if (minute < 60) {
-                second = (int) (time % 60);
+                second = (int) (secTime % 60);
                 timeStr = "00:" + unitFormat(minute) + ":" + unitFormat(second);
             } else {
                 hour = minute / 60;
                 if (hour > 99)
                     return "99:59:59";
                 minute = minute % 60;
-                second = (int) (time - hour * 3600 - minute * 60);
+                second = (int) (secTime - hour * 3600 - minute * 60);
                 timeStr = unitFormat(hour) + ":" + unitFormat(minute) + ":" + unitFormat(second);
             }
         }

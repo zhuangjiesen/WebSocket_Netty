@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * @param
  * @Author: zhuangjiesen
- * @Description:
+ * @Description: 通用bing 识别返回值
  * @Date: Created in 2018/5/20
  */
 public class RecognizeResponse {

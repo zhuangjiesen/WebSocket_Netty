@@ -1,8 +1,9 @@
 package com.jason.bing;
 
 import com.alibaba.fastjson.JSONObject;
-import com.jason.bing.util.MessageUtil;
 import com.jason.bing.util.BingUtil;
+import com.jason.bing.util.MessageUtil;
+import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,6 +18,17 @@ import java.util.Map;
  * @Date: Created in 2018/5/21
  */
 public abstract class AbstractRecognizeEventListener implements RecognizeEventListener {
+
+    //停顿 300ms * 10000 等于 100纳秒单位
+    public static final int breakMSecond = 200 * 10000;
+    //单词数
+    public static final int wordSizeLimit = 0;
+    //缓存时效性
+    public static final int CACHE_LIVETIME_SECONDS = 12 * 60 * 60;
+
+
+    private static final Logger LOGGER = Logger.getLogger(AbstractRecognizeEventListener.class);
+
     //封装 telemetry 消息
     public List<Map<String, String>> metrics = new ArrayList<>(3);
     //封装 telemetry 消息
@@ -28,24 +40,39 @@ public abstract class AbstractRecognizeEventListener implements RecognizeEventLi
     public void onSpeechFragment(RecognizeResponse response){}
     public void onSpeechEndDetected(RecognizeResponse response){}
     public void onSpeechStartDetected(RecognizeResponse response){}
+    public void onSpeechClosed(RecognizeResponse response){}
+    public void onSpeechError(RecognizeResponse response){}
 
     public void onTurnEnd(RecognizeResponse response){}
     public void onTurnStart(RecognizeResponse response){
         metricConnection.put("End" , BingUtil.getTimestamp() );
         metrics.add(metricConnection);
-        metricConnection = null;
+        metricConnection.clear();
     }
+
 
     /*
      *
-     * websocket连接前调用
+     * 文件解析，触发文件结果解析
+     * @author zhuangjiesen
+     * @date 2018/5/25 下午4:42
+     * @param
+     * @return
+     */
+    public void onFileEnd(RecognizeResponse response){
+
+    }
+
+
+    /*
+     *
+     * websocket 连接前调用
      * @author zhuangjiesen
      * @date 2018/5/21 下午3:51
      * @param
      * @return
      */
     public void beforeConnectionStart(RecognizeResponse response){
-        System.out.println("========beforeConnectionStart========");
         metricConnection.put("name" , "Connection" );
         metricConnection.put("id" , response.getRequestId() );
         metricConnection.put("start" , BingUtil.getTimestamp() );
@@ -83,8 +110,6 @@ public abstract class AbstractRecognizeEventListener implements RecognizeEventLi
         //help gc
         metrics.clear();
         receivedMessages.clear();
-        receivedMessages = null;
-        metrics = null;
         return messageSb.toString();
     }
 
@@ -96,9 +121,11 @@ public abstract class AbstractRecognizeEventListener implements RecognizeEventLi
      * @return
      */
     @Override
-    public void onRecognizeEventTriggered(RecognizeWebSocket recognizeWebSocket, RecognizeResponse response) {
+    public void onRecognizeEventTriggered(Object recognizationClient,  RecognizeResponse response) {
+
         String path = response.getPath();
 //        addReceivedMessages(path);
+        LOGGER.debug(String.format(" path : %s , requestid : %s , text : %s " , path  , response.getRequestId() , response.getBody()));
         switch (path) {
             case SpeechEventConstant.SPEECH_FRAGMENT:
                 onSpeechFragment(response);
@@ -110,8 +137,19 @@ public abstract class AbstractRecognizeEventListener implements RecognizeEventLi
                 onTurnStart(response);
                 break;
             case SpeechEventConstant.TURN_END:
+                //关闭websocket 连接
 //                recognizeWebSocket.sendString(getTelemetryMessage(response));
                 onTurnEnd(response);
+                if (recognizationClient instanceof SpeechRecognizationClient) {
+                    SpeechRecognizationClient speechRecognizationClient = (SpeechRecognizationClient)recognizationClient;
+                    speechRecognizationClient.close();
+                    if (speechRecognizationClient.isLast()) {
+                        onFileEnd(response);
+                    }
+                } else if (recognizationClient instanceof SyncRecognizationClient) {
+                    SyncRecognizationClient client = (SyncRecognizationClient)recognizationClient;
+                    client.close();
+                }
                 break;
             case SpeechEventConstant.SPEECH_STARTDETECTED:
                 onSpeechStartDetected(response);
@@ -121,6 +159,15 @@ public abstract class AbstractRecognizeEventListener implements RecognizeEventLi
                 break;
             case SpeechEventConstant.BEFORE_CONNECTION_START:
                 beforeConnectionStart(response);
+                break;
+            case SpeechEventConstant.SPEECH_FILE_END:
+                onFileEnd(response);
+                break;
+            case SpeechEventConstant.SPEECH_CLOSE:
+                onSpeechClosed(response);
+                break;
+            case SpeechEventConstant.SPEECH_ERROR:
+                onSpeechError(response);
                 break;
         }
 

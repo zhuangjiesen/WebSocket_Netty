@@ -1,6 +1,8 @@
 package com.jason.bing;
 
+import com.jason.bing.util.BingUtil;
 import com.jason.bing.util.MessageUtil;
+import org.apache.log4j.Logger;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
@@ -8,32 +10,58 @@ import org.eclipse.jetty.websocket.client.WebSocketClient;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.URI;
-import java.util.UUID;
+import java.nio.ByteBuffer;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @param
  * @Author: zhuangjiesen
- * @Description: 必应语音识别webosket 接口实现
- * @Date: Created in 2018/5/20
+ * @Description:
+ * @Date: Created in 2018/5/31
  */
-public class BingSpeechWebSocketClient {
-    private static final String URL_FORMAT = "wss://speech.platform.bing.com/speech/recognition/#{recognitionMode}/cognitiveservices/v1?format=#{format}&language=#{language}&Ocp-Apim-Subscription-Key=#{subscriptionKey}&X-ConnectionId=#{connectionId}";
+public class BingRecognizationClient {
 
-    private String url;
-    private String connectionId;
-    private String requestId;
-    private RecognizerConfig recognizerConfig;
-    private String subscriptionKey;
+    private static final Logger LOGGER = Logger.getLogger(BingRecognizationClient.class);
 
-    private RecognizeWebSocket recognizeWebSocket ;
+    /** 刷新websocket 缓存区的计数器 **/
+    private static final int FLUSH_TIMES = 3;
+
+    private AtomicInteger flushCountor = new AtomicInteger(FLUSH_TIMES);
+
+    private boolean isFlush() {
+        if (flushCountor.decrementAndGet() <= 0) {
+            flushCountor.set(FLUSH_TIMES);
+            return true;
+        }
+        return false;
+    }
 
 
+    public static final String URL_FORMAT = "wss://speech.platform.bing.com/speech/recognition/#{recognitionMode}/cognitiveservices/v1?format=#{format}&language=#{language}&Ocp-Apim-Subscription-Key=#{subscriptionKey}&X-ConnectionId=#{connectionId}";
+
+    protected String url;
+    protected String connectionId;
+    protected String requestId;
+    protected RecognizerConfig recognizerConfig;
+    protected String subscriptionKey;
+    /** 不是最后一个连接**/
+    private boolean last;
+
+
+    protected RecognizeEventListener recognizeEventListener;
+    protected Session webSocketSession;
+
+
+    /** 转异步的用法 **/
+    private CountDownLatch sycnLatch;
 
 
     public String getUrl() {
-        this.connectionId = this.getUUID();
+        this.connectionId = BingUtil.getUUID();
         String recognitionMode = recognizerConfig.getRecognitionMode();
         String format = recognizerConfig.getFormat();
         String language = recognizerConfig.getLanguage();
@@ -46,17 +74,38 @@ public class BingSpeechWebSocketClient {
         return this.url;
     }
 
-    public Session createRecognizer(RecognizerConfig recognizerConfig , String subscriptionKey , RecognizeEventListener recognizeEventListener) {
+
+    public BingRecognizationClient(RecognizerConfig recognizerConfig, String subscriptionKey, RecognizeEventListener recognizeEventListener) {
+        this.recognizerConfig = recognizerConfig;
+        this.subscriptionKey = subscriptionKey;
+        this.recognizeEventListener = recognizeEventListener;
+    }
+
+
+
+    public BingRecognizationClient(RecognizeEventListener recognizeEventListener) {
+        this.recognizerConfig = RecognizerConfig.getDefaultRecognizerConfig();
+        this.subscriptionKey = SpeechEventConstant.SUBSCRIPTION_KEY ;
+        this.recognizeEventListener = recognizeEventListener;
+    }
+
+
+
+    public void createConnection () {
+        LOGGER.debug("bing WebSocket createConnection.! ");
+        if (this.webSocketSession != null) {
+            return ;
+        }
+
         if (recognizeEventListener == null) {
             throw new NullPointerException("recognizeEventListener required not null");
         }
         this.recognizerConfig = recognizerConfig;
         this.subscriptionKey = subscriptionKey;
-        this.requestId = this.getUUID();
-
+        this.requestId = BingUtil.getUUID();
+        this.recognizeEventListener = recognizeEventListener;
         SslContextFactory sslContextFactory = new SslContextFactory();
         WebSocketClient client = new WebSocketClient(sslContextFactory);
-        recognizeWebSocket = new RecognizeWebSocket(recognizeEventListener);
         try
         {
             client.start();
@@ -64,21 +113,20 @@ public class BingSpeechWebSocketClient {
             URI echoUri = new URI(this.getUrl());
             ClientUpgradeRequest request = new ClientUpgradeRequest();
             request.setHeader("Ocp-Apim-Subscription-Key" , this.getSubscriptionKey());
-            Future<Session> fuq = client.connect(recognizeWebSocket,echoUri,request);
-            return fuq.get();
+            Future<Session> fuq = client.connect(this ,echoUri,request);
+            this.webSocketSession = fuq.get();
         }
         catch (Throwable t)
         {
-            t.printStackTrace();
+            LOGGER.error(t.getMessage() , t);
             if (!client.isStopped()) {
-//                client.stop();
+                try {
+                    client.stop();
+                } catch (Exception e) {
+                    LOGGER.error(e.getMessage() , e);
+                }
             }
         }
-        finally
-        {
-
-        }
-        return null;
     }
 
 
@@ -90,7 +138,15 @@ public class BingSpeechWebSocketClient {
      * @return
      */
     public void recognizer(byte[] audioData) {
-        recognizeWebSocket.sendAudioData(audioData);
+        boolean isFlush = isFlush();
+        createConnection();
+        try {
+            byte[] audioHeader = MessageUtil.getAudioHeader(this.requestId);
+//            this.webSocketSession.getRemote().sendPartialBytes(ByteBuffer.wrap(MessageUtil.getAudioMessage(audioHeader , audioData)) , isFlush );
+            this.webSocketSession.getRemote().sendBytes(ByteBuffer.wrap(MessageUtil.getAudioMessage(audioHeader , audioData)));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -104,6 +160,7 @@ public class BingSpeechWebSocketClient {
      * @return
      */
     public void recognizer(String audioSource) {
+        createConnection();
         try {
             //audio 消息头
             byte[] audioHeader = MessageUtil.getAudioHeader(this.requestId);
@@ -120,10 +177,12 @@ public class BingSpeechWebSocketClient {
                     content = new byte[len];
                     System.arraycopy(buf , 0 , content , 0 , len);
                 }
-                recognizeWebSocket.sendAudioData(MessageUtil.getAudioMessage(audioHeader , content));
+
+                this.webSocketSession.getRemote().sendBytes(ByteBuffer.wrap(MessageUtil.getAudioMessage(audioHeader , content)));
+
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage() , e);
         }
     }
 
@@ -137,13 +196,14 @@ public class BingSpeechWebSocketClient {
      * @return
      */
     public void recognizerAudioData(byte[] data) {
+        createConnection();
         try {
             //audio 消息头
             byte[] audioHeader = MessageUtil.getAudioHeader(this.requestId);
             int bufLen = 8 * 1024;
             if (bufLen > data.length) {
                 //文件数据小，直接一个包发出去
-                recognizeWebSocket.sendAudioData(MessageUtil.getAudioMessage(audioHeader , data));
+                this.webSocketSession.getRemote().sendBytes(ByteBuffer.wrap(MessageUtil.getAudioMessage(audioHeader , data)));
             } else {
                 //数据分块上传识别
                 byte[] buf = new byte[bufLen];
@@ -152,24 +212,19 @@ public class BingSpeechWebSocketClient {
                     int len = data.length - pos;
                     System.arraycopy(data , pos , buf , 0 , len < bufLen? len : bufLen);
                     pos += bufLen;
-                    recognizeWebSocket.sendAudioData(MessageUtil.getAudioMessage(audioHeader , buf));
+                    this.webSocketSession.getRemote().sendBytes(ByteBuffer.wrap(MessageUtil.getAudioMessage(audioHeader , buf)));
                 }
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage() , e);
         }
     }
 
 
     public void close() {
-        recognizeWebSocket.close();
+        webSocketSession.close();
     }
-
-//    createRecognizer(recognizerConfig, subscriptionKey);
-
-//    createRecognizerWithFileAudioSource(recognizerConfig, subscriptionKey, files[0]);
-
 
     public void setUrl(String url) {
         this.url = url;
@@ -200,11 +255,6 @@ public class BingSpeechWebSocketClient {
     }
 
 
-    public String getUUID() {
-        String uuid = UUID.randomUUID().toString().replaceAll("-", "");
-        return uuid;
-    }
-
 
     public String getRequestId() {
         return requestId;
@@ -213,4 +263,35 @@ public class BingSpeechWebSocketClient {
     public void setRequestId(String requestId) {
         this.requestId = requestId;
     }
+
+    public boolean isLast() {
+        return last;
+    }
+
+    public void setLast(boolean last) {
+        this.last = last;
+    }
+
+
+
+
+    /*
+     *
+     * 触发对应的事件
+     * @author zhuangjiesen
+     * @date 2018/6/1 上午12:00
+     * @param
+     * @return
+     */
+    public void eventTrigger(String event) {
+        if (this.recognizeEventListener != null) {
+            RecognizeResponse response = new RecognizeResponse();
+            response.setRequestId(this.requestId);
+            response.setPath(event);
+            this.recognizeEventListener.onRecognizeEventTriggered(this , response);
+        }
+    }
+
+
+
 }

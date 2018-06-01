@@ -75,6 +75,7 @@
     }
     function readyWs() {
         ws = new WebSocket('ws://localhost:38888/');
+//        ws = new WebSocket('ws://127.0.0.1:8088/ws/audiostream?liveId=620595');
         ws.onopen = function() {
             log('CONNECT');
         };

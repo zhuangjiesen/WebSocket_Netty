@@ -3,7 +3,7 @@ package com.jason.bing;
 /**
  * @param
  * @Author: zhuangjiesen
- * @Description:
+ * @Description: bing 配置类
  * @Date: Created in 2018/5/20
  */
 public class RecognizerConfig {
@@ -51,7 +51,7 @@ public class RecognizerConfig {
     public RecognizerConfig() {
     }
 
-    //内部类单例
+    //内部类单例 初始化默认参数
     private static class RecognizerConfigHolder {
         /** 默认参数 **/
         public static RecognizerConfig defaultRecognizerConfig = new RecognizerConfig("Dictation" ,"en-US" , "Simple" );

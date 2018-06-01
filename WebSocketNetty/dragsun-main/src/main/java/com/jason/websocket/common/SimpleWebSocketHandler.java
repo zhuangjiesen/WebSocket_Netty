@@ -2,6 +2,7 @@ package com.jason.websocket.common;
 
 import com.dragsun.websocket.client.WebSocketSession;
 import com.dragsun.websocket.handler.websocket.AbstractWebSocketHandler;
+import io.netty.handler.codec.http.websocketx.PingWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 
@@ -27,6 +28,10 @@ public class SimpleWebSocketHandler extends AbstractWebSocketHandler {
 
             TextWebSocketFrame response = new TextWebSocketFrame("我是返回信息... : " + System.currentTimeMillis());
             webSocketSession.sendMessage(response);
+
+
+            System.out.println("i am sending ping message ...");
+            webSocketSession.sendMessage(new PingWebSocketFrame());
         }
 
     }

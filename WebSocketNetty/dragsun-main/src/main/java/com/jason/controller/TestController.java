@@ -1,8 +1,10 @@
 package com.jason.controller;
 
 
+import com.alibaba.fastjson.JSONObject;
 import com.jason.bing.*;
 import com.jason.bing.util.WordUtil;
+import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -69,14 +71,13 @@ public class TestController {
             return result;
         }
 
+
+
+
         //文件数据
         byte[] audioData = file.getBytes();
-        BingSpeechWebSocketClient client = new BingSpeechWebSocketClient();
-        RecognizerConfig recognizerConfig = RecognizerConfig.getDefaultRecognizerConfig();
-//        recognizerConfig.setRecognitionMode(SpeechEventConstant.MODE_CONVERSATION);
-        // 用作同步方法
-        final CountDownLatch countor = new CountDownLatch(1);
-        client.createRecognizer(recognizerConfig, SpeechEventConstant.SUBSCRIPTION_KEY , new AbstractRecognizeEventListener() {
+
+        SyncRecognizationClient client = new SyncRecognizationClient(new AbstractRecognizeEventListener() {
             private List<WordInfo> phraseList = new ArrayList<>();
             //停顿 300ms * 10000 等于 100纳秒单位
             private int breakMSecond = 200 * 10000;
@@ -84,16 +85,18 @@ public class TestController {
             private int wordSizeLimit = 0;
 
             private List<SentenceInfo> sentenceInfoList = new ArrayList<SentenceInfo>();
-            private SentenceInfo currentSentenceInfo;
+            private SentenceInfo currentSentenceInfo = new SentenceInfo();
 
             @Override
             public void onSpeechPhrase(RecognizeResponse response) {
                 WordInfo wordInfo = WordUtil.parsePhrase(response.getBodyEntity());
+
+                System.out.println("--- onSpeechPhrase --- : " + JSONObject.toJSONString(wordInfo));
                 if (wordInfo == null) {
                     return;
                 }
                 phraseList.add(wordInfo);
-                int startTime = wordInfo.getStartTimeNum();
+                long startTime = wordInfo.getStartTimeNum();
                 if (currentSentenceInfo == null) {
                     return;
                 }
@@ -103,7 +106,7 @@ public class TestController {
                 List<WordInfo> fragmentList = currentSentenceInfo.getWordInfoList();
                 if (fragmentList != null) {
                     for (WordInfo fragmentItem : fragmentList) {
-                        int startTimeOld = fragmentItem.getStartTimeNum();
+                        long startTimeOld = fragmentItem.getStartTimeNum();
                         fragmentItem.setStartTimeNum(startTimeOld + startTime);
                         WordUtil.resetTime(fragmentItem);
                     }
@@ -145,7 +148,7 @@ public class TestController {
                 } else {
                     sentenceInfoList.add(currentSentenceInfo);
                 }
-                currentSentenceInfo = null;
+                currentSentenceInfo = new SentenceInfo();
             }
 
             @Override
@@ -154,60 +157,67 @@ public class TestController {
                 if (wordInfo == null) {
                     return ;
                 }
-                if (currentSentenceInfo == null) {
-                    currentSentenceInfo = new SentenceInfo();
-                }
                 currentSentenceInfo.addWordInfo(wordInfo);
             }
 
             @Override
             public void onTurnEnd(RecognizeResponse response) {
+
                 System.out.println("phrase : ---------------------");
+                for (WordInfo item : phraseList) {
+                    System.out.println(item);
+                }
+
+            }
+
+
+            @Override
+            public void onSpeechClosed(RecognizeResponse response) {
+
+                System.out.println("==== 文件解析结束 =======");
+
+//                System.out.println("phrase : ---------------------");
                 //bing翻译结果
                 List<String> plainList = new ArrayList<String>();
                 // 翻译后人工断句的结果
                 List<String> senList = new ArrayList<String>();
                 for (WordInfo item : phraseList) {
-                    System.out.println(item);
+//                    System.out.println(item);
                     plainList.add(item.toString());
                 }
 
-                System.out.println("=============================");
+//                System.out.println("=============================");
 
-                System.out.println("fragment : ----------------------");
+//                System.out.println("fragment : ----------------------");
 
+//                for (SentenceInfo item : sentenceInfoList) {
+//                    List<WordInfo> fragmentList = item.getWordInfoList();
+//                    for (WordInfo wordItem : fragmentList) {
+//                        System.out.println(wordItem.toString());
+//                    }
+//                }
+//                System.out.println("=============================");
+
+//                System.out.println("sentence : ----------------------");
                 for (SentenceInfo item : sentenceInfoList) {
-                    List<WordInfo> fragmentList = item.getWordInfoList();
-                    for (WordInfo wordItem : fragmentList) {
-                        System.out.println(wordItem.toString());
-                    }
-                }
-                System.out.println("=============================");
-
-                System.out.println("sentence : ----------------------");
-                for (SentenceInfo item : sentenceInfoList) {
-                    System.out.println(item.getSentence());
+//                    System.out.println(item.getSentence());
                     senList.add(item.getSentence());
                 }
 
                 result.put("phraseList" , plainList);
                 result.put("sentenceInfoList" , senList);
-                //同步输出结果
-                countor.countDown();
             }
         });
-        //开始识别
-        client.recognizerAudioData(file.getBytes());
+        client.recognizerAudioData(audioData);
+        client.await();
+        System.out.println(" recognize finish .....");
 
-        try {
-            countor.await();
-            client.close();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         //返回json
         return result;
     }
+
+
+
 
 
 }
