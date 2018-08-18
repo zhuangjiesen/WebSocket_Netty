@@ -37,7 +37,10 @@ public abstract class AbstractRecognizeEventListener implements RecognizeEventLi
 //    private Map<String, String> metricListeningTrigger = new HashMap<>(4);
 
     public void onSpeechPhrase (RecognizeResponse response){}
+    @Deprecated
     public void onSpeechFragment(RecognizeResponse response){}
+
+    public void onSpeechHypothesis(RecognizeResponse response){}
     public void onSpeechEndDetected(RecognizeResponse response){}
     public void onSpeechStartDetected(RecognizeResponse response){}
     public void onSpeechClosed(RecognizeResponse response){}
@@ -125,13 +128,17 @@ public abstract class AbstractRecognizeEventListener implements RecognizeEventLi
 
         String path = response.getPath();
 //        addReceivedMessages(path);
-        LOGGER.debug(String.format(" path : %s , requestid : %s , text : %s " , path  , response.getRequestId() , response.getBody()));
+//        LOGGER.debug(String.format(" path : %s , requestid : %s , text : %s " , path  , response.getRequestId() , response.getBody()));
+//        LOGGER.info(String.format(" path : %s , requestid : %s , text : %s " , path  , response.getRequestId() , response.getBody()));
         switch (path) {
             case SpeechEventConstant.SPEECH_FRAGMENT:
                 onSpeechFragment(response);
                 break;
             case SpeechEventConstant.SPEECH_PHRASE:
                 onSpeechPhrase(response);
+                break;
+            case SpeechEventConstant.SPEECH_HYPOTHESIS:
+                onSpeechHypothesis(response);
                 break;
             case SpeechEventConstant.TURN_START:
                 onTurnStart(response);

@@ -4,11 +4,26 @@ package com.jason.controller;
 import com.alibaba.fastjson.JSONObject;
 import com.jason.bing.*;
 import com.jason.bing.util.WordUtil;
+import com.jason.core.annotation.PostJsonParam;
+import com.jason.core.mybatis.MybatisDao;
+import com.jason.mapper.UserMapper;
+import com.jason.model.BaseObject;
+import com.jason.model.User;
+import com.jason.service.TestService;
+import com.jason.util.BeanHelper;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.builder.annotation.MethodResolver;
+import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.mapping.ResultMap;
+import org.apache.ibatis.session.Configuration;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,11 +34,63 @@ import java.util.concurrent.CountDownLatch;
  * Created by zhuangjiesen on 2018/2/17.
  */
 @RestController
+@RequestMapping(value = "/test")
 public class TestController {
 
-    @RequestMapping("test")
+
+    @Autowired
+    private TestService testService;
+
+    @RequestMapping(value = {"/" , "/222/"} )
     public String test(){
-        return "test";
+        return "pagename";
+    }
+
+
+    @RequestMapping(value = "testGetParam.do" )
+    public Map<String, Object> testGetParam(
+//            String name ,
+//            String content ,
+            BaseObject baseObject ,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ){
+        Map<String, Object> resp = new HashMap<>();
+        resp.put("success" , "1");
+        resp.put("testPostParam" , "HELLO");
+        return resp;
+    }
+
+
+
+    @RequestMapping("testPostParam.do")
+    public Map<String, Object> testPostParam(
+            String name ,
+//            @RequestBody Map<String , Object> body ,
+            @RequestBody BaseObject baseObject ,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ){
+        Map<String, Object> resp = new HashMap<>();
+        resp.put("success" , "1");
+        resp.put("testPostParam" , "HELLO");
+        return resp;
+    }
+
+
+    @RequestMapping("testPostParamAnnotation.do")
+    @PostJsonParam
+    public Map<String, Object> testPostParamAnnotation(
+            String name ,
+            Integer age,
+            Map<String , Object> map ,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ){
+        Map<String, Object> resp = new HashMap<>();
+        resp.put("success" , "1");
+        resp.put("testPostParam" , "HELLO");
+        return resp;
     }
 
 
@@ -34,8 +101,6 @@ public class TestController {
     @RequestMapping("saveMeeting.do")
     public Map<String, Object> saveMeeting(String meetingName){
         Map<String, Object> resp = new HashMap<>();
-
-
         resp.put("success" , "1");
         return resp;
     }
@@ -215,6 +280,48 @@ public class TestController {
         //返回json
         return result;
     }
+
+
+    @RequestMapping("/mybatis/data")
+    public String getdbTest(){
+        UserMapper userMapper = BeanHelper.applicationContext.getBean(UserMapper.class);
+        List<User> userList = userMapper.selectAllUserList();
+
+        String text = JSONObject.toJSONString(userList);
+        System.out.println(String.format(" text : %s " , text));
+
+
+        User user = userMapper.getUser(1L);
+        JSONObject resp = new JSONObject();
+
+        resp.put("userList", userList);
+        resp.put("user", user);
+        return resp.toJSONString();
+    }
+
+
+    @RequestMapping("/mybatis/tk/data")
+    public String getTkMybatisData(){
+        MybatisDao mybatisDao = BeanHelper.applicationContext.getBean(MybatisDao.class);
+
+
+
+
+
+
+        UserMapper userMapper = BeanHelper.applicationContext.getBean(UserMapper.class);
+
+        User user = new User();
+        user.setName("通用user");
+        user.setPassword("ssss");
+        Integer rows = userMapper.insert(user);
+        System.out.println("rows : " + rows );
+        System.out.println("id : " + user.getId() );
+
+
+        return "success";
+    }
+
 
 
 

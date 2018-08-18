@@ -9,6 +9,16 @@ package com.jason.bing;
  */
 public interface SpeechEventConstant {
 
+
+    //    public static final String URL_FORMAT = "wss://eastasia.stt.speech.microsoft.com/speech/recognition/#{recognitionMode}/cognitiveservices/v1?format=#{format}&language=#{language}&Ocp-Apim-Subscription-Key=#{subscriptionKey}&X-ConnectionId=#{connectionId}";
+    public static final String URL_FORMAT = "wss://speech.platform.bing.com/speech/recognition/#{recognitionMode}/cognitiveservices/v1?format=#{format}&language=#{language}&Ocp-Apim-Subscription-Key=#{subscriptionKey}&X-ConnectionId=#{connectionId}";
+    public static final String SUBSCRIPTION_KEY = "0a8732f7b5fa41ff88bcd04edd86e1c6";
+
+    //新的speech service a0245300989f4eca897794a056daaa4a
+    public static final String PREVIEW_SUBSCRIPTION_KEY = "a0245300989f4eca897794a056daaa4a";
+    public static final String PREVIEW_URL_FORMAT = "wss://eastasia.stt.speech.microsoft.com/speech/recognition/#{recognitionMode}/cognitiveservices/v1?format=#{format}&language=#{language}&Ocp-Apim-Subscription-Key=#{subscriptionKey}&X-ConnectionId=#{connectionId}";
+
+
     public static final String BING_SN_PREFIX = "bing_sn_prefix:%s";
 
 
@@ -17,12 +27,11 @@ public interface SpeechEventConstant {
 
 
     /** 每个音频文件时间  **/
-    public static final long PER_AUDIO_TIME = 5 * 60 * 1000;
+    public static final long PER_AUDIO_TIME = 2 * 60 * 1000;
 
     /**  每个连接的时间限制 **/
     public static final int LIMIT_MILISECONDS = 5 * 60 * 1000;
 
-    public static final String SUBSCRIPTION_KEY = "c9f881d1f5064db29c50588d5718946f";
     /** 换行符 **/
     public static final String LINE_SEP = "\r\n";
     public static final String MODE_CONVERSATION = "conversation";
@@ -39,6 +48,7 @@ public interface SpeechEventConstant {
     public static final String SPEECH_CONFIG = "speech.config";
     public static final String SPEECH_TELEMETRY = "speech.telemetry";
     public static final String SPEECH_FRAGMENT = "speech.fragment";
+    public static final String SPEECH_HYPOTHESIS = "speech.hypothesis";
     public static final String SPEECH_PHRASE = "speech.phrase";
     public static final String TURN_START = "turn.start";
     public static final String SPEECH_STARTDETECTED = "speech.startDetected";

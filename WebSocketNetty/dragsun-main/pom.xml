@@ -12,9 +12,6 @@
     <artifactId>dragsun-main</artifactId>
 
     <name>dragsun-main</name>
-    <!-- FIXME change it to the project's website -->
-    <url>http://www.example.com</url>
-
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <dragsun.websocket.version>1.0-SNAPSHOT</dragsun.websocket.version>
@@ -22,8 +19,6 @@
     </properties>
 
     <dependencies>
-
-
 
         <dependency>
             <groupId>dragsun.websocket</groupId>
@@ -36,6 +31,21 @@
             <artifactId>bing-speech</artifactId>
             <version>${netease.bing.version}</version>
         </dependency>
+
+
+        <!-- https://mvnrepository.com/artifact/org.activiti/activiti-engine -->
+        <dependency>
+            <groupId>org.activiti</groupId>
+            <artifactId>activiti-engine</artifactId>
+            <version>5.17.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.mybatis</groupId>
+                    <artifactId>mybatis</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
 
     </dependencies>
 

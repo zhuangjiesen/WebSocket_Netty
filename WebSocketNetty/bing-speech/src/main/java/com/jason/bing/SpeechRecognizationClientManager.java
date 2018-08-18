@@ -16,7 +16,7 @@ public class SpeechRecognizationClientManager {
 
     private static final Logger LOGGER = Logger.getLogger(SpeechRecognizationClientManager.class);
 
-    private static final String URL_FORMAT = "wss://speech.platform.bing.com/speech/recognition/#{recognitionMode}/cognitiveservices/v1?format=#{format}&language=#{language}&Ocp-Apim-Subscription-Key=#{subscriptionKey}&X-ConnectionId=#{connectionId}";
+
     private String url;
     private volatile SpeechRecognizationClient recognizationClient;
 
@@ -42,7 +42,7 @@ public class SpeechRecognizationClientManager {
 
     public SpeechRecognizationClientManager(RecognizeEventListener recognizeEventListener) {
         this.recognizerConfig = RecognizerConfig.getDefaultRecognizerConfig();
-        this.subscriptionKey = SpeechEventConstant.SUBSCRIPTION_KEY;
+        this.subscriptionKey = SpeechEventConstant.PREVIEW_SUBSCRIPTION_KEY;
         this.recognizeEventListener = recognizeEventListener;
     }
 
@@ -80,7 +80,8 @@ public class SpeechRecognizationClientManager {
 
     public SpeechRecognizationClient buildNewRecognizationClient() {
         LOGGER.info(" buildNewRecognizationClient  ");
-        SpeechRecognizationClient client = new SpeechRecognizationClient(this.recognizerConfig , this.subscriptionKey , this.recognizeEventListener);
+//        SpeechRecognizationClient client = new SpeechRecognizationClient(this.recognizerConfig , this.subscriptionKey , this.recognizeEventListener);
+        SpeechRecognizationClient client = new SpeechRecognizationClient(this.recognizerConfig , this.subscriptionKey ,SpeechEventConstant.PREVIEW_URL_FORMAT , this.recognizeEventListener);
         return client;
     }
 

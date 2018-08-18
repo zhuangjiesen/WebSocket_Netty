@@ -20,8 +20,6 @@ public class SyncRecognizationClient extends BingRecognizationClient {
 
     private static final Logger LOGGER = Logger.getLogger(SyncRecognizationClient.class);
 
-    private static final String URL_FORMAT = "wss://speech.platform.bing.com/speech/recognition/#{recognitionMode}/cognitiveservices/v1?format=#{format}&language=#{language}&Ocp-Apim-Subscription-Key=#{subscriptionKey}&X-ConnectionId=#{connectionId}";
-
 
     /** 转异步的用法 **/
     private CountDownLatch sycnLatch;

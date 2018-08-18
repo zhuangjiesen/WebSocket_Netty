@@ -13,11 +13,11 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 >
 
 
-	<!--<bean id="webSocketHandler" class="com.jason.websocket.speech.bing.BingWebSocketHandler"></bean>-->
+	<bean id="webSocketHandler" class="com.jason.websocket.speech.bing.BingWebSocketHandler"></bean>
 	<!--<bean id="webSocketHandler" class="com.dragsun.speech.google.GoogleWebSocketHandler"></bean>-->
 
 	<!--默认处理器-->
-	<bean id="webSocketHandler" class="com.jason.websocket.common.SimpleWebSocketHandler"></bean>
+	<!--<bean id="webSocketHandler" class="com.jason.websocket.common.SimpleWebSocketHandler"></bean>-->
 	<!--配置-->
 	<bean id="wSConfiguration" class="com.dragsun.websocket.server.Configuration">
 		<property name="webSocketHandler" ref="webSocketHandler"/>

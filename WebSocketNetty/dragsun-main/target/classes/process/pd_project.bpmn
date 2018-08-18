@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" xmlns:tns="http://www.activiti.org/test" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" expressionLanguage="http://www.w3.org/1999/XPath" id="m1533624740364" name="" targetNamespace="http://www.activiti.org/test" typeLanguage="http://www.w3.org/2001/XMLSchema">
+  <process id="pd_process" isClosed="false" isExecutable="true" name="派单系统" processType="None">
+    <startEvent id="start" name="StartEvent"/>
+    <userTask activiti:candidateGroups="Customer" activiti:exclusive="true" id="customer_submit_pjt" name="客户方发布ar需求"/>
+    <userTask activiti:candidateGroups="Manager" activiti:exclusive="true" id="100" name="洞见管理员 - 审核ar需求"/>
+    <exclusiveGateway gatewayDirection="Unspecified" id="is_pass" name="审核通过？">
+      <documentation id="_5_D_1"/>
+    </exclusiveGateway>
+    <sequenceFlow id="_6" name="否" sourceRef="is_pass" targetRef="customer_submit_pjt">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${pass=="false"}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="_7" sourceRef="start" targetRef="customer_submit_pjt"/>
+    <sequenceFlow id="_8" sourceRef="customer_submit_pjt" targetRef="manager_pass_pjt"/>
+    <sequenceFlow id="_9" sourceRef="manager_pass_pjt" targetRef="is_pass"/>
+    <userTask activiti:candidateGroups="Customer" activiti:exclusive="true" id="22" name="客户方 - 选择服务商并发布需求">
+      <extensionElements>
+      </extensionElements>
+    </userTask>
+    <userTask activiti:exclusive="true" id="isv_coor_success" name="ISV - 确认合作"/>
+    <endEvent id="_35" name="EndEvent"/>
+    <subProcess activiti:exclusive="true" id="isv_choose_project" name="服务选择子流程" triggeredByEvent="false">
+      <multiInstanceLoopCharacteristics isSequential="false">
+        <loopCardinality><![CDATA[${subprocessCount}]]></loopCardinality>
+        <completionCondition><![CDATA[${signComplete.isComplete()}]]></completionCondition>
+      </multiInstanceLoopCharacteristics>
+      <startEvent id="sub_start" name="StartEvent"/>
+      <endEvent id="sub_end" name="EndEvent">
+        <extensionElements>
+        </extensionElements>
+      </endEvent>
+      <userTask activiti:exclusive="true" id="isv_submit_price" name="洞见MR-ISV用户，竞标，报价、提案">
+        <extensionElements>
+        </extensionElements>
+      </userTask>
+      <userTask  activiti:exclusive="false" id="manager_pass_price" name="洞见管理员 - 对ISV报价审核"/>
+      <userTask  activiti:exclusive="true" id="customer_choose_success" name="客户选择ISV服务商，并提交"/>
+      <sequenceFlow id="_48" sourceRef="sub_start" targetRef="isv_submit_price"/>
+      <sequenceFlow id="_49" sourceRef="isv_submit_price" targetRef="manager_pass_price"/>
+      <sequenceFlow id="_50" sourceRef="manager_pass_price" targetRef="customer_choose_success"/>
+      <sequenceFlow id="_51" sourceRef="customer_choose_success" targetRef="sub_end"/>
+    </subProcess>
+    <sequenceFlow id="_4" sourceRef="customer_choose_isv" targetRef="isv_choose_project"/>
+    <exclusiveGateway gatewayDirection="Unspecified" id="_5" name="是否被选中"/>
+    <sequenceFlow id="_10" sourceRef="isv_choose_project" targetRef="_5"/>
+    <sequenceFlow id="_12" name="否" sourceRef="_5" targetRef="_35">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${choose=="false"}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="_13" sourceRef="_5" targetRef="isv_coor_success">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${choose=="true"}]]></conditionExpression>
+    </sequenceFlow>
+    <userTask activiti:exclusive="true" id="manager_choose_isv" name="洞见管理员 - 设置服务提供商选择"/>
+    <sequenceFlow id="_11" name="是" sourceRef="is_pass" targetRef="manager_choose_isv">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${pass=="true"}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="_14" sourceRef="manager_choose_isv" targetRef="customer_choose_isv"/>
+    <userTask activiti:exclusive="true" id="isv_upload_result" name="ISV - 上传最终成果"/>
+    <userTask activiti:exclusive="true" id="manager_pass_result" name="洞见管理员 - 审核最终成果"/>
+    <userTask activiti:exclusive="true" id="customer_check_result_success" name="客户方 - 确认成果"/>
+    <sequenceFlow id="_18" sourceRef="isv_coor_success" targetRef="isv_upload_result"/>
+    <sequenceFlow id="_19" sourceRef="isv_upload_result" targetRef="manager_pass_result"/>
+    <exclusiveGateway gatewayDirection="Unspecified" id="_22" name="最终成果审核情况?"/>
+    <sequenceFlow id="_23" sourceRef="manager_pass_result" targetRef="_22"/>
+    <sequenceFlow id="_24" name="审核通过" sourceRef="_22" targetRef="customer_check_result_success">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${success=="true"}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="_25" name="审核不通过" sourceRef="_22" targetRef="isv_upload_result">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${success=="false"}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="_26" sourceRef="customer_check_result_success" targetRef="_35"/>
+  </process>
+  <bpmndi:BPMNDiagram documentation="background=#3C3F41;count=1;horizontalcount=1;orientation=0;width=842.4;height=1195.2;imageableWidth=832.4;imageableHeight=1185.2;imageableX=5.0;imageableY=5.0" id="Diagram-_1" name="New Diagram">
+    <bpmndi:BPMNPlane bpmnElement="pd_process">
+      <bpmndi:BPMNShape bpmnElement="start" id="Shape-start">
+        <omgdc:Bounds height="32.0" width="32.0" x="20.0" y="40.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="customer_submit_pjt" id="Shape-customer_submit_pjt">
+        <omgdc:Bounds height="55.0" width="85.0" x="75.0" y="30.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="55.0" width="85.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="manager_pass_pjt" id="Shape-manager_pass_pjt">
+        <omgdc:Bounds height="75.0" width="90.0" x="190.0" y="15.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="75.0" width="90.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="is_pass" id="Shape-is_pass" isMarkerVisible="false">
+        <omgdc:Bounds height="32.0" width="32.0" x="330.0" y="30.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="customer_choose_isv" id="Shape-customer_choose_isv">
+        <omgdc:Bounds height="55.0" width="85.0" x="570.0" y="45.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="55.0" width="85.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="isv_coor_success" id="Shape-isv_coor_success">
+        <omgdc:Bounds height="55.0" width="140.0" x="1420.0" y="100.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="55.0" width="140.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="_35" id="Shape-_35">
+        <omgdc:Bounds height="32.0" width="32.0" x="1440.0" y="605.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="isv_choose_project" id="Shape-isv_choose_project" isExpanded="true">
+        <omgdc:Bounds height="215.0" width="595.0" x="685.0" y="20.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="215.0" width="595.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="_5" id="Shape-_5" isMarkerVisible="false">
+        <omgdc:Bounds height="32.0" width="32.0" x="1310.0" y="110.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="manager_choose_isv" id="Shape-manager_choose_isv">
+        <omgdc:Bounds height="55.0" width="85.0" x="425.0" y="40.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="55.0" width="85.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="isv_upload_result" id="Shape-isv_upload_result">
+        <omgdc:Bounds height="55.0" width="170.0" x="1415.0" y="190.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="55.0" width="170.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="manager_pass_result" id="Shape-manager_pass_result">
+        <omgdc:Bounds height="55.0" width="190.0" x="1405.0" y="275.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="55.0" width="190.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="customer_check_result_success" id="Shape-customer_check_result_success">
+        <omgdc:Bounds height="55.0" width="170.0" x="1400.0" y="480.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="55.0" width="170.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="_22" id="Shape-_22" isMarkerVisible="false">
+        <omgdc:Bounds height="32.0" width="32.0" x="1470.0" y="350.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="sub_start" id="Shape-sub_start">
+        <omgdc:Bounds height="32.0" width="32.0" x="730.0" y="110.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="sub_end" id="Shape-sub_end">
+        <omgdc:Bounds height="32.0" width="32.0" x="1195.0" y="125.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="isv_submit_price" id="Shape-isv_submit_price">
+        <omgdc:Bounds height="85.0" width="85.0" x="790.0" y="80.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="85.0" width="85.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="manager_pass_price" id="Shape-manager_pass_price">
+        <omgdc:Bounds height="85.0" width="85.0" x="920.0" y="80.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="85.0" width="85.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="customer_choose_success" id="Shape-customer_choose_success">
+        <omgdc:Bounds height="85.0" width="85.0" x="1060.0" y="85.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="85.0" width="85.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="_13" id="BPMNEdge__13" sourceElement="_5" targetElement="isv_coor_success">
+        <omgdi:waypoint x="1342.0" y="126.0"/>
+        <omgdi:waypoint x="1420.0" y="127.5"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_12" id="BPMNEdge__12" sourceElement="_5" targetElement="_35">
+        <omgdi:waypoint x="1325.0" y="141.0"/>
+        <omgdi:waypoint x="1325.0" y="290.0"/>
+        <omgdi:waypoint x="1440.0" y="621.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="6.0" width="0.0" x="0.0" y="-70.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_14" id="BPMNEdge__14" sourceElement="manager_choose_isv" targetElement="customer_choose_isv">
+        <omgdi:waypoint x="510.0" y="67.5"/>
+        <omgdi:waypoint x="570.0" y="72.5"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_19" id="BPMNEdge__19" sourceElement="isv_upload_result" targetElement="manager_pass_result">
+        <omgdi:waypoint x="1500.0" y="245.0"/>
+        <omgdi:waypoint x="1500.0" y="275.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_18" id="BPMNEdge__18" sourceElement="isv_coor_success" targetElement="isv_upload_result">
+        <omgdi:waypoint x="1490.0" y="155.0"/>
+        <omgdi:waypoint x="1490.0" y="190.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_24" id="BPMNEdge__24" sourceElement="_22" targetElement="customer_check_result_success">
+        <omgdi:waypoint x="1486.0" y="382.0"/>
+        <omgdi:waypoint x="1486.0" y="480.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_23" id="BPMNEdge__23" sourceElement="manager_pass_result" targetElement="_22">
+        <omgdi:waypoint x="1486.0" y="330.0"/>
+        <omgdi:waypoint x="1486.0" y="350.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_48" id="BPMNEdge__48" sourceElement="sub_start" targetElement="isv_submit_price">
+        <omgdi:waypoint x="762.0" y="126.0"/>
+        <omgdi:waypoint x="790.0" y="122.5"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_26" id="BPMNEdge__26" sourceElement="customer_check_result_success" targetElement="_35">
+        <omgdi:waypoint x="1500.0" y="535.0"/>
+        <omgdi:waypoint x="1500.0" y="570.0"/>
+        <omgdi:waypoint x="1472.0" y="621.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_25" id="BPMNEdge__25" sourceElement="_22" targetElement="isv_upload_result">
+        <omgdi:waypoint x="1470.0" y="366.0"/>
+        <omgdi:waypoint x="1360.0" y="295.0"/>
+        <omgdi:waypoint x="1415.0" y="217.5"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_49" id="BPMNEdge__49" sourceElement="isv_submit_price" targetElement="manager_pass_price">
+        <omgdi:waypoint x="875.0" y="122.5"/>
+        <omgdi:waypoint x="920.0" y="122.5"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_4" id="BPMNEdge__4" sourceElement="customer_choose_isv" targetElement="isv_choose_project">
+        <omgdi:waypoint x="655.0" y="72.5"/>
+        <omgdi:waypoint x="685.0" y="127.5"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_6" id="BPMNEdge__6" sourceElement="is_pass" targetElement="customer_submit_pjt">
+        <omgdi:waypoint x="346.0" y="62.0"/>
+        <omgdi:waypoint x="295.0" y="125.0"/>
+        <omgdi:waypoint x="117.5" y="85.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_7" id="BPMNEdge__7" sourceElement="start" targetElement="customer_submit_pjt">
+        <omgdi:waypoint x="52.0" y="56.0"/>
+        <omgdi:waypoint x="75.0" y="57.5"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_8" id="BPMNEdge__8" sourceElement="customer_submit_pjt" targetElement="manager_pass_pjt">
+        <omgdi:waypoint x="160.0" y="57.5"/>
+        <omgdi:waypoint x="190.0" y="52.5"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_51" id="BPMNEdge__51" sourceElement="customer_choose_success" targetElement="sub_end">
+        <omgdi:waypoint x="1145.0" y="127.5"/>
+        <omgdi:waypoint x="1195.0" y="141.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_9" id="BPMNEdge__9" sourceElement="manager_pass_pjt" targetElement="is_pass">
+        <omgdi:waypoint x="280.0" y="52.5"/>
+        <omgdi:waypoint x="330.0" y="46.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_50" id="BPMNEdge__50" sourceElement="manager_pass_price" targetElement="customer_choose_success">
+        <omgdi:waypoint x="1005.0" y="122.5"/>
+        <omgdi:waypoint x="1060.0" y="127.5"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_11" id="BPMNEdge__11" sourceElement="is_pass" targetElement="manager_choose_isv">
+        <omgdi:waypoint x="362.0" y="46.0"/>
+        <omgdi:waypoint x="425.0" y="67.5"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="-42.0" x="-1.0" y="-14.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_10" id="BPMNEdge__10" sourceElement="isv_choose_project" targetElement="_5">
+        <omgdi:waypoint x="1280.0" y="127.5"/>
+        <omgdi:waypoint x="1310.0" y="126.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

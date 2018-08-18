@@ -2,9 +2,72 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>测试测试</title>
+    <script src="../../js/jquery.min.js" ></script>
+    <script src="../../js/jquery.form.js" ></script>
+    <style>
+    </style>
 </head>
-<body>
+<body style="padding-left: 30px;">
+<h1>测试ajax</h1>
+<button id="accessSubmit">验证码提交</button>
+<button id="queryBtn">查询按钮</button>
+<script>
 
+    $('#accessSubmit').on('click' , function(){
+        $.ajax({
+            type : "POST",
+            url:"http://10.242.26.164:18080/api/company/inviteecode/submit",
+            async:false,
+            contentType: "application/json;charset=utf-8",
+            data : JSON.stringify(
+                    {
+                        "inviteeEmail":"zhuangjiesen@corp.netease.com",
+                        "inviteeCode":"123"
+                    }
+            ),
+            success : function(result) {
+                console.log('result : ' , result);
+                if (result == "success") {
+
+                } else {
+                }
+            },
+            error:function(msg){
+                console.log('msg : ' , msg);
+                $(".notice").html('Error:'+msg);
+            }
+        });
+    });
+
+
+    $('#queryBtn').on('click' , function(){
+        $.ajax({
+            type : "GET",
+            url:"http://10.242.26.164:18080/api/company/companyinfo/pass?email=zhuangjiesen@corp.netease.com&code=427899",
+            async:false,
+            contentType: "application/json;charset=utf-8",
+//            data : JSON.stringify(
+//                    {
+//                        "inviteeEmail":"zhuangjiesen@corp.netease.com",
+//                        "inviteeCode":"123"
+//                    }
+//            ),
+            success : function(result) {
+                console.log('result : ' , result);
+                if (result == "success") {
+
+                } else {
+                }
+            },
+            error:function(msg){
+                console.log('msg : ' , msg);
+                $(".notice").html('Error:'+msg);
+            }
+        });
+    });
+
+
+</script>
 </body>
 </html>

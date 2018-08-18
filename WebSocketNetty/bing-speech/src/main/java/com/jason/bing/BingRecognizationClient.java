@@ -41,9 +41,10 @@ public class BingRecognizationClient {
     }
 
 
-    public static final String URL_FORMAT = "wss://speech.platform.bing.com/speech/recognition/#{recognitionMode}/cognitiveservices/v1?format=#{format}&language=#{language}&Ocp-Apim-Subscription-Key=#{subscriptionKey}&X-ConnectionId=#{connectionId}";
 
     protected String url;
+    /** url模板 **/
+    protected String urlFormat;
     protected String connectionId;
     protected String requestId;
     protected RecognizerConfig recognizerConfig;
@@ -65,7 +66,8 @@ public class BingRecognizationClient {
         String recognitionMode = recognizerConfig.getRecognitionMode();
         String format = recognizerConfig.getFormat();
         String language = recognizerConfig.getLanguage();
-        String mUrl = URL_FORMAT.replace("#{recognitionMode}" , recognitionMode);
+//        String mUrl = SpeechEventConstant.URL_FORMAT.replace("#{recognitionMode}" , recognitionMode);
+        String mUrl = this.urlFormat.replace("#{recognitionMode}" , recognitionMode);
         mUrl = mUrl.replace("#{format}" , format);
         mUrl = mUrl.replace("#{language}" , language);
         mUrl = mUrl.replace("#{subscriptionKey}" , this.subscriptionKey);
@@ -76,18 +78,31 @@ public class BingRecognizationClient {
 
 
     public BingRecognizationClient(RecognizerConfig recognizerConfig, String subscriptionKey, RecognizeEventListener recognizeEventListener) {
+        this(recognizerConfig , subscriptionKey , null ,recognizeEventListener);
+    }
+
+
+    public BingRecognizationClient(RecognizerConfig recognizerConfig, String subscriptionKey, String urlFormat, RecognizeEventListener recognizeEventListener) {
         this.recognizerConfig = recognizerConfig;
         this.subscriptionKey = subscriptionKey;
         this.recognizeEventListener = recognizeEventListener;
+        if (urlFormat == null) {
+            this.urlFormat = SpeechEventConstant.URL_FORMAT;
+        } else {
+            this.urlFormat = urlFormat;
+        }
     }
 
+
+    public BingRecognizationClient(String subscriptionKey, String urlFormat, RecognizeEventListener recognizeEventListener) {
+        this(RecognizerConfig.getDefaultRecognizerConfig(), subscriptionKey, urlFormat, recognizeEventListener);
+    }
 
 
     public BingRecognizationClient(RecognizeEventListener recognizeEventListener) {
-        this.recognizerConfig = RecognizerConfig.getDefaultRecognizerConfig();
-        this.subscriptionKey = SpeechEventConstant.SUBSCRIPTION_KEY ;
-        this.recognizeEventListener = recognizeEventListener;
+        this(RecognizerConfig.getDefaultRecognizerConfig() , SpeechEventConstant.SUBSCRIPTION_KEY , null ,recognizeEventListener);
     }
+
 
 
 

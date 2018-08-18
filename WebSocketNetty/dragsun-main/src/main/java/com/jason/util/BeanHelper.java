@@ -3,6 +3,7 @@ package com.jason.util;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Component;
 
 /**
  * @param
@@ -10,6 +11,7 @@ import org.springframework.context.ApplicationContextAware;
  * @Description:
  * @Date: Created in 2018/5/14
  */
+@Component
 public class BeanHelper implements ApplicationContextAware {
     public static ApplicationContext applicationContext;
 

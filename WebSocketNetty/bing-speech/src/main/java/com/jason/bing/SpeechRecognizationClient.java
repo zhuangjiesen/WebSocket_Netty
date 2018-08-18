@@ -20,6 +20,10 @@ public class SpeechRecognizationClient extends BingRecognizationClient {
     private static final Logger LOGGER = Logger.getLogger(SpeechRecognizationClient.class);
 
 
+    public SpeechRecognizationClient(RecognizerConfig recognizerConfig, String subscriptionKey, String urlFormat, RecognizeEventListener recognizeEventListener) {
+        super(recognizerConfig , subscriptionKey, urlFormat, recognizeEventListener);
+    }
+
 
     public SpeechRecognizationClient(RecognizerConfig recognizerConfig, String subscriptionKey, RecognizeEventListener recognizeEventListener) {
         super(recognizerConfig , subscriptionKey , recognizeEventListener);

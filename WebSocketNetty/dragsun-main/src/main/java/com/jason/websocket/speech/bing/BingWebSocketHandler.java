@@ -6,6 +6,7 @@ import com.dragsun.websocket.client.WebSocketSession;
 import com.dragsun.websocket.handler.websocket.WebSocketHandler;
 import com.jason.bing.*;
 import com.jason.bing.*;
+import com.jason.bing.handler.SpeechPreviewRecognizeEventListener;
 import com.jason.bing.util.MessageUtil;
 import com.jason.bing.util.WordUtil;
 import io.netty.buffer.ByteBuf;
@@ -57,6 +58,11 @@ public class BingWebSocketHandler implements WebSocketHandler {
     private void sendData(byte[] data , WebSocketSession webSocketSession){
         SpeechRecognizationClientManager client = clientMap.get(webSocketSession.getId());
         if (client == null) {
+            client = new SpeechRecognizationClientManager(new SpeechPreviewRecognizeEventListener());
+
+            /*
+
+
             client = new SpeechRecognizationClientManager(new AbstractRecognizeEventListener() {
                 private long lastMessageTime;
 
@@ -166,19 +172,13 @@ public class BingWebSocketHandler implements WebSocketHandler {
 
 
                 @Override
-                public void onTurnEnd(RecognizeResponse response) {
-//                    System.out.println("---------------------------------");
-                    System.out.println("---------------onTurnEnd--- : " + JSONObject.toJSONString(response));
-//                    System.out.println("---------------------------------");
-                }
-
-
-                @Override
-                public void onFileEnd(RecognizeResponse response) {
-                    System.out.println("---------------onFileEnd--- : " + JSONObject.toJSONString(response));
+                public void onSpeechError(RecognizeResponse response) {
+                    System.out.println("response : "+ JSONObject.toJSONString(response));
                 }
             });
 
+
+            * */
             clientMap.put(webSocketSession.getId() , client);
         }
         client.recognizer(data);
