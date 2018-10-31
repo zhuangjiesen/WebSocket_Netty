@@ -12,10 +12,10 @@ public interface SpeechEventConstant {
 
     //    public static final String URL_FORMAT = "wss://eastasia.stt.speech.microsoft.com/speech/recognition/#{recognitionMode}/cognitiveservices/v1?format=#{format}&language=#{language}&Ocp-Apim-Subscription-Key=#{subscriptionKey}&X-ConnectionId=#{connectionId}";
     public static final String URL_FORMAT = "wss://speech.platform.bing.com/speech/recognition/#{recognitionMode}/cognitiveservices/v1?format=#{format}&language=#{language}&Ocp-Apim-Subscription-Key=#{subscriptionKey}&X-ConnectionId=#{connectionId}";
-    public static final String SUBSCRIPTION_KEY = "0a8732f7b5fa41ff88bcd04edd86e1c6";
+    public static final String SUBSCRIPTION_KEY = "xxxxxxx";
 
-    //新的speech service a0245300989f4eca897794a056daaa4a
-    public static final String PREVIEW_SUBSCRIPTION_KEY = "a0245300989f4eca897794a056daaa4a";
+    //新的speech service sssss
+    public static final String PREVIEW_SUBSCRIPTION_KEY = "xxxxxxxx";
     public static final String PREVIEW_URL_FORMAT = "wss://eastasia.stt.speech.microsoft.com/speech/recognition/#{recognitionMode}/cognitiveservices/v1?format=#{format}&language=#{language}&Ocp-Apim-Subscription-Key=#{subscriptionKey}&X-ConnectionId=#{connectionId}";
 
 
